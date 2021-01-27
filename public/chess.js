@@ -7,13 +7,11 @@ const Players = {
     "b": 1
 }
 
-function hasLowerCase(str) {
-    return String(str).toUpperCase() != str;
-}
+hasLowerCase = (str) => String(str).toUpperCase() != str;
 
-function getCoordinates(position){
-    return [Math.floor(position / 8), (position % 8) * position/Math.abs(position)];
-}
+getCoordinates = (position) => [Math.floor(position / 8), (position % 8) * position/Math.abs(position)];
+
+getPosition = (coordinates) => coordinates[0] * 8 + coordinates[1];
 
 function changePlayer(player){
     if(player == Players.black) 
@@ -21,26 +19,25 @@ function changePlayer(player){
     return Players.black;
 }
 
+addCoordinates = (cood1, cood2) => [Number.parseInt(cood1[0]) + Number.parseInt(cood2[0]), Number.parseInt(cood1[1]) + Number.parseInt(cood2[1])];
+
+
 function playerMultiplier(player){
     if(player == Players.black)
         return 1;
     return -1;
 }
 
-function isLeftEdge(position){
-    return position % 8 == 0;
-}
+isLeftEdge = (position) => position % 8 == 0;
 
-function isRightEdge(position){
-    return position % 8 == 7;
-}
+isRightEdge = (position) => position % 8 == 7;
 
-function checkOutOfBounds(currentPos, nextMove){
-    currentCoordinate = getCoordinates(currentPos);
-    nextCoordinate = getCoordinates(nextMove);
-    if(currentCoordinate[0] + nextCoordinate[0] > 7 || currentCoordinate[1] + nextCoordinate[1] > 7)
+function checkOutOfBounds(currentCoordinate, nextCoordinate){
+    resultCoordinate = addCoordinates(currentCoordinate, nextCoordinate);
+
+    if(resultCoordinate[0] > 7 || resultCoordinate[1] > 7)
         return true;
-    if(currentCoordinate[0] + nextCoordinate[0] < 0 || currentCoordinate[1] + nextCoordinate[1] < 0)
+    if(resultCoordinate[0] < 0 || resultCoordinate[1] < 0)
         return true;
     return false;
 }
@@ -62,29 +59,35 @@ class Piece{
     }
 
     getAllMoves(board, position){
-        // Output Pos64
+        /**
+         * Converts to coordinates(2d) and processes as checkOutOfBounds logic is in 2d
+         * Otherwise will lead to confusing choices when -ve numbers come to play
+         * eg: for N -> actual move [2, -1] => 15 => [1, 7] (in checkOutOfBounds)
+         * Similary for [1, -1] => 7 => [0, 7]
+         * 
+         * Final moves are always +ve so it is unaffected
+         */
         position = Number.parseInt(position);
+        let positionCoord = getCoordinates(position);
         let moves = [], move;
         for(move of this.nextNormalMoves){
-            move = Number.parseInt(move);
-            console.log(move);
-            if(!checkOutOfBounds(position, move)){
-                if(this.nextCaptureMoves && board.array[move + position])
+            if(!checkOutOfBounds(positionCoord, move)){
+                if(this.nextCaptureMoves && board.array[getPosition(addCoordinates(move, positionCoord))])
                     continue;
                 if(this.multipleMoves){
-                    for(var pos = position; !checkOutOfBounds(pos, move); pos += move)
-                        if((board.array[move + pos]?.player) != board.player)
-                            moves.push(pos + move);
+                    for(var pos = positionCoord; !checkOutOfBounds(pos, move); pos = addCoordinates(move, pos))
+                        if((board.array[getPosition(addCoordinates(move, pos))]?.player) != board.player)
+                            moves.push(getPosition(addCoordinates(move, pos)));
                 }
                 else
                     if(board.array[move + pos]?.player != board.player)
-                        moves.push(position + move);
+                        moves.push(getPosition(addCoordinates(move, positionCoord)));
             }
         }
         // Capture Moves(Pawn)
         for(move of this.nextCaptureMoves)
-            if(!checkOutOfBounds(position, move) && Piece.getPlayer(board.array[move + position]) == changePlayer(board.player))
-                moves.push(move);
+            if(!checkOutOfBounds(position, move) && board.array[getPosition(addCoordinates(move, positionCoord))]?.player == changePlayer(board.player))
+                moves.push(getPosition(addCoordinates(move, positionCoord)));
 
         moves.push(...this.getSpecialMoves(board, position));
         return moves;
@@ -107,11 +110,11 @@ class Pawn extends Piece{
     }
 
     setNextMoves(){
-        this.nextNormalMoves = [playerMultiplier(this.player) * 8];
+        this.nextNormalMoves = [[playerMultiplier(this.player), 0]];
 
         this.nextCaptureMoves = [
-            playerMultiplier(this.player) * 8 + 1,
-            playerMultiplier(this.player) * 8 - 1,
+            [playerMultiplier(this.player), 1],
+            [playerMultiplier(this.player), -1],
         ];
     }
 
@@ -137,31 +140,31 @@ class Pawn extends Piece{
 
 class Knight extends Piece{
     constructor(type){
-        super(type, [17, 10, 15, 6, -6, -15, -10, -17], [], false);
+        super(type, [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [2, -1], [2, 1]], [], false);
     }
 }
 
 class Bishop extends Piece{
     constructor(type){
-        super(type, [-7, 7, 9, -9], [], true);
+        super(type, [[1, -1], [-1, 1], [-1, -1], [1, 1]], [], true);
     }
 }
 
 class Rook extends Piece{
     constructor(type){
-        super(type, [8, -8, -1, 1], [], true);
+        super(type, [[1, 0], [-1, 0], [0, -1], [0, 1]], [], true);
     }
 }
 
 class Queen extends Piece{
     constructor(type){
-        super(type, [8, -8, -1, 1, -7, 7, 9, -9], [], true);
+        super(type, [[1, 0], [-1, 0], [0, -1], [0, 1], [1, -1], [-1, 1], [-1, -1], [1, 1]], [], true);
     }
 }
 
 class King extends Piece{
     constructor(type){
-        super(type, [8, -8, -1, 1, -7, 7, 9, -9], [], false);
+        super(type, [[1, 0], [-1, 0], [0, -1], [0, 1], [1, -1], [-1, 1], [-1, -1], [1, 1]], [], false);
     }
 
     getSpecialMoves(board, position){
