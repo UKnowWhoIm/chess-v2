@@ -1,3 +1,5 @@
+// Common Utility Functions
+
 const Players = {
     "white": 0,
     "black": 1,
@@ -6,8 +8,44 @@ const Players = {
 }
 
 function hasLowerCase(str) {
-    return str.toUpperCase() != str;
+    return String(str).toUpperCase() != str;
 }
+
+function getCoordinates(position){
+    return [Math.floor(position / 8), (position % 8) * position/Math.abs(position)];
+}
+
+function changePlayer(player){
+    if(player == Players.black) 
+        return Players.white;
+    return Players.black;
+}
+
+function playerMultiplier(player){
+    if(player == Players.black)
+        return 1;
+    return -1;
+}
+
+function isLeftEdge(position){
+    return position % 8 == 0;
+}
+
+function isRightEdge(position){
+    return position % 8 == 7;
+}
+
+function checkOutOfBounds(currentPos, nextMove){
+    currentCoordinate = getCoordinates(currentPos);
+    nextCoordinate = getCoordinates(nextMove);
+    if(currentCoordinate[0] + nextCoordinate[0] > 7 || currentCoordinate[1] + nextCoordinate[1] > 7)
+        return true;
+    if(currentCoordinate[0] + nextCoordinate[0] < 0 || currentCoordinate[1] + nextCoordinate[1] < 0)
+        return true;
+    return false;
+}
+
+// Piece Classes
 
 class Piece{
     constructor(type, nextNormalMoves, nextCaptureMoves, multipleMoves){
@@ -25,28 +63,31 @@ class Piece{
 
     getAllMoves(board, position){
         // Output Pos64
-        let moves = [];
-        for(move in this.nextNormalMoves)
+        position = Number.parseInt(position);
+        let moves = [], move;
+        for(move of this.nextNormalMoves){
+            move = Number.parseInt(move);
+            console.log(move);
             if(!checkOutOfBounds(position, move)){
-                if(this.nextCaptureMoves && Piece.getPlayer(board.array[move + position]) != null)
+                if(this.nextCaptureMoves && board.array[move + position])
                     continue;
                 if(this.multipleMoves){
                     for(var pos = position; !checkOutOfBounds(pos, move); pos += move)
-                        if(Piece.getPlayer(board.array[move + pos]) != board.player)
-                            moves.push(pos);
+                        if((board.array[move + pos]?.player) != board.player)
+                            moves.push(pos + move);
                 }
                 else
-                    if(Piece.getPlayer(board.array[move + position]) != board.player)
-                        moves.push(position);
+                    if(board.array[move + pos]?.player != board.player)
+                        moves.push(position + move);
             }
-            
-
+        }
         // Capture Moves(Pawn)
-        for(move in this.nextCaptureMoves)
+        for(move of this.nextCaptureMoves)
             if(!checkOutOfBounds(position, move) && Piece.getPlayer(board.array[move + position]) == changePlayer(board.player))
                 moves.push(move);
 
         moves.push(...this.getSpecialMoves(board, position));
+        return moves;
     }
 
     static getPlayer(piece){
@@ -78,8 +119,7 @@ class Pawn extends Piece{
         let startingCol = {}, moves = [];
         startingCol[Players.white] = 6;
         startingCol[Players.black] = 1;
-        
-        if(startingPosition[this.player] == Math.floor(position / 8))
+        if(startingCol[this.player] == Math.floor(position / 8))
             moves.push(position + playerMultiplier(this.player) * 16);
 
         if(board.enPassantSquare){
@@ -97,41 +137,41 @@ class Pawn extends Piece{
 
 class Knight extends Piece{
     constructor(type){
-        super(type, [17, 10, 15, 6, -6, -15, -10, -17], null, false);
+        super(type, [17, 10, 15, 6, -6, -15, -10, -17], [], false);
     }
 }
 
 class Bishop extends Piece{
     constructor(type){
-        super(type, [-7, 7, 9, -9], null, true);
+        super(type, [-7, 7, 9, -9], [], true);
     }
 }
 
 class Rook extends Piece{
     constructor(type){
-        super(type, [8, -8, -1, 1], null, true);
+        super(type, [8, -8, -1, 1], [], true);
     }
 }
 
 class Queen extends Piece{
     constructor(type){
-        super(type, [8, -8, -1, 1, -7, 7, 9, -9], null, true);
+        super(type, [8, -8, -1, 1, -7, 7, 9, -9], [], true);
     }
 }
 
 class King extends Piece{
     constructor(type){
-        super(type, [8, -8, -1, 1, -7, 7, 9, -9], null, false);
+        super(type, [8, -8, -1, 1, -7, 7, 9, -9], [], false);
     }
 
     getSpecialMoves(board, position){
-        let moves = []
-        if(board.castleData[Players[board.player]]['k'])
+        let moves = [];
+        if(board.castleData[board.player]['k'])
             if(board.array[position + 1] == null && board.array[position + 2] == null 
                 && !board.isCheck())
                     moves.push(position + 2);
         
-        if(board.castleData[Players[board.player]]['q'])
+        if(board.castleData[board.player]['q'])
             if(board.array[position - 1] == null && board.array[position - 2] == null  && board.array[position - 3]
                 && !board.isCheck())
                     moves.push(pos - 2);
@@ -148,6 +188,8 @@ const PieceMap = {
     "q": Queen,
     "k": King,
 };
+
+// Board Class
 
 class Board{
     constructor(fenRepresentation){
@@ -393,36 +435,4 @@ class Board{
         return fen;
     }
 
-}
-
-function getCoordinates(position){
-    return [Math.floor(position / 8), (position % 8) * position/Math.abs(position)];
-}
-
-function changePlayer(player){
-    if(player == Players.black) 
-        return Players.white;
-    return Players.black;
-}
-
-function playerMultiplier(player){
-    if(player == Players.black)
-        return -1;
-    return 1;
-}
-
-function isLeftEdge(position){
-    return position % 8 == 0;
-}
-
-function isRightEdge(position){
-    return position % 8 == 7;
-}
-
-function checkOutOfBounds(currentPos, nextMove){
-    currentCoordinate = getCoordinates(currentPos);
-    nextCoordinate = getCoordinates(nextMove);
-
-    return !(0 <= currentCoordinate[0] + nextCoordinate[0] <= 7 &&
-        0 <= currentCoordinate[1] + nextCoordinate[1] <= 7);
 }
