@@ -13,7 +13,7 @@
           margin: auto;
       }
       .highlight{
-        background-color: coral;
+        background-color: coral!important;
       }
       td{
           height: 60px;
@@ -29,102 +29,105 @@
           background-color: grey;
       }
       .selected{
-          background-color:chocolate;
+          background-color:orange;
       }
     </style>
-    <script>
-      const pieceToText = {
-        "K": "&#x2654;",
-        "Q": "&#x2655;",
-        "R": "&#x2656;",
-        "B": "&#x2657;",
-        "N": "&#x2658;",
-        "P": "&#x2659;",
-        "k": "&#x265A;",
-        "q": "&#x265B;",
-        "r": "&#x265C;",
-        "b": "&#x265D;",
-        "n": "&#x265E;",
-        "p": "&#x265F;",
-      }
-      const initialFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
-      var board = new Board(initialFen);
-      let selectedPiece;
-
-      function boardToHTML(){
-          console.log(board.array);
-          let table = document.createElement("table");
-          let currentRow;
-          for(i=0; i<64; i++){
-              if(i % 8 == 0){
-                  if(currentRow)
-                    table.appendChild(currentRow);
-                  currentRow = document.createElement("tr");
-              }
-              
-              let currentColumn = document.createElement("td");
-              if((Math.floor(i/8) + (i % 8)) % 2 == 0)
-                  currentColumn.classList.add("light-cell");
-              else
-                  currentColumn.classList.add("dark-cell");
-              
-              if(board.array[i])
-                  currentColumn.innerHTML = pieceToText[board.array[i].type];
-              currentColumn.setAttribute("id", i);
-              currentRow.appendChild(currentColumn);
-          }
-          table.appendChild(currentRow);
-          $("#board").append(table);
-      }
-
-      function highlightMoves(index){
-          let moves = board.array[index].getAllMoves(board, index);
-          console.log(moves);
-          for(move of moves){
-            
-          }
-      }
-
-      function unselect(){
-          $("#" + selectedPiece).removeClass("selected");
-          selectedPiece = null;
-      }
-
-      function select(index){
-          unselect();
-          $("#" + index).addClass("selected");
-          selectedPiece = index;
-          highlightMoves(index);
-      }
-      
-      function processClick(index){
-          if(selectedPiece === index)
-              unselect();
-          else if(selectedPiece == null && board.array[index])
-              select(index);
-          else if(board.array[index].player == board.array[selectedPiece].player)
-              select(index);
-          else{
-              // TODO
-          }
-      }
-
-      $(document).ready(function(){
-          boardToHTML();
-          
-          $("td").click(function(){
-              processClick(this.id);
-          });
-      });
-
-      
-      
-    </script>
     <title></title>
   </head>
   <body>
     <div id="board">
 
     </div>
+    <script>
+        const pieceToText = {
+          "K": "&#x2654;",
+          "Q": "&#x2655;",
+          "R": "&#x2656;",
+          "B": "&#x2657;",
+          "N": "&#x2658;",
+          "P": "&#x2659;",
+          "k": "&#x265A;",
+          "q": "&#x265B;",
+          "r": "&#x265C;",
+          "b": "&#x265D;",
+          "n": "&#x265E;",
+          "p": "&#x265F;",
+        }
+        const initialFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
+        var board = new Board(initialFen);
+        let selectedPiece;
+  
+        function boardToHTML(){
+            console.log(board.array);
+            let table = document.createElement("table");
+            let currentRow;
+            for(i=0; i<64; i++){
+                if(i % 8 == 0){
+                    if(currentRow)
+                      table.appendChild(currentRow);
+                    currentRow = document.createElement("tr");
+                }
+                
+                let currentColumn = document.createElement("td");
+                if((Math.floor(i/8) + (i % 8)) % 2 == 0)
+                    currentColumn.classList.add("light-cell");
+                else
+                    currentColumn.classList.add("dark-cell");
+                
+                if(board.array[i])
+                    currentColumn.innerHTML = pieceToText[board.array[i].type];
+                currentColumn.setAttribute("id", i);
+                currentRow.appendChild(currentColumn);
+            }
+            table.appendChild(currentRow);
+            $("#board").append(table);
+        }
+  
+        function highlightMoves(index){
+            let moves = board.array[index].getAllMoves(board, index);
+            console.log(moves);
+            for(move of moves)
+                $("#"+String(move)).addClass("highlight");
+        }
+  
+        function unselect(){
+            $("#" + selectedPiece).removeClass("selected");
+            selectedPiece = null;
+            $(".highlight").removeClass("highlight");
+        }
+  
+        function select(index){
+            unselect();
+            $("#" + index).addClass("selected");
+            selectedPiece = index;
+            highlightMoves(index);
+        }
+        
+        function processClick(index){
+            if(selectedPiece === index)
+                unselect();
+            else if(selectedPiece == null && board.array[index] && board.player == board.array[index].player)
+                select(index);
+            else if(board.array[index]?.player == changePlayer(board.player))
+                unselect();
+            else if(selectedPiece != null){
+                let legalMoves = board.getNextMoves();
+                if(legalMoves[selectedPiece].includes(Number.parseInt(index))){
+                    board.makeMove(selectedPiece, index);
+                }
+            }
+        }
+  
+        $(document).ready(function(){
+            boardToHTML();
+            
+            $("td").click(function(){
+                processClick(this.id);
+            });
+        });
+  
+        
+        
+      </script>
   </body>
 </html>

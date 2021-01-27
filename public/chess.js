@@ -9,9 +9,21 @@ const Players = {
 
 hasLowerCase = (str) => String(str).toUpperCase() != str;
 
-getCoordinates = (position) => [Math.floor(position / 8), (position % 8) * position/Math.abs(position)];
+getCoordinates = (position) => [Math.floor(position / 8), (position % 8)];
 
 getPosition = (coordinates) => coordinates[0] * 8 + coordinates[1];
+
+addCoordinates = (cood1, cood2) => [cood1[0]*1 + cood2[0], cood1[1]*1 + cood2[1]];
+
+isLeftEdge = (position) => position % 8 == 0;
+
+isRightEdge = (position) => position % 8 == 7;
+
+function getLocationFromNotation(notation){
+    // e6 -> [2, 4]
+    const col = {"a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7};
+    return [ 8 - String.parseInt(notation[1]) , col[notation[0]]];
+}
 
 function changePlayer(player){
     if(player == Players.black) 
@@ -19,18 +31,11 @@ function changePlayer(player){
     return Players.black;
 }
 
-addCoordinates = (cood1, cood2) => [Number.parseInt(cood1[0]) + Number.parseInt(cood2[0]), Number.parseInt(cood1[1]) + Number.parseInt(cood2[1])];
-
-
 function playerMultiplier(player){
     if(player == Players.black)
         return 1;
     return -1;
 }
-
-isLeftEdge = (position) => position % 8 == 0;
-
-isRightEdge = (position) => position % 8 == 7;
 
 function checkOutOfBounds(currentCoordinate, nextCoordinate){
     resultCoordinate = addCoordinates(currentCoordinate, nextCoordinate);
@@ -238,14 +243,10 @@ class Board{
 
     getEnPassantData(enPassatString){
         if(enPassatString != "-")
-            return Board.getLocationFromNotation(enPassatString);
+            return getLocationFromNotation(enPassatString);
     }
 
-    static getLocationFromNotation(notation){
-        // e6 -> [2, 4]
-        const col = {"a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7};
-        return [ 8 - String.parseInt(notation[1]) , col[notation[0]]];
-    }
+    
 
     getFENPieces(pieceData){
         let board = [];
@@ -261,11 +262,11 @@ class Board{
         return board;
     }
 
-    static getAllPieces(board, player){
+    getAllPieces(player){
         // outputs pos64
         let pieces = [];
         for(var i=0; i<64; i++) 
-            if(board[i] && board[i].player == Players[player])
+            if(this.array[i]?.player == player)
                 pieces.push(i);
         return pieces;
     }
@@ -329,36 +330,39 @@ class Board{
     }
 
     isCheck(){
-        let kingPos = this.findPiece(getKing());
-        let nextMoves = this.getNextMoves(checkForCheck=false, changePlayer(this.player));
-        for(const [piece, moves] in Object.entries(nextMoves))
-            if(kingPos in moves)
+        let piece;
+        let kingPos = this.findPiece(this.getKing());
+        let nextMoves = this.getNextMoves(false, changePlayer(this.player));
+        for(piece in nextMoves)
+            if(kingPos in nextMoves[piece])
                 return true;
         return false;
     }
 
     getNextMoves(checkForCheck=true, player=this.player){
         // Outputs as pos64 
-        let pieces = Board.getAllPieces(this.array, player);
+        let pieces = this.getAllPieces(player);
+        let piece, moves, move;
         let validMoves = {};
         let legalMoves = {};
-
-        pieces.forEach(piece => validMoves[piece] = this.array[piece].getAllMoves(piece));
-
+        pieces.forEach(piece => validMoves[piece] = this.array[piece].getAllMoves(this, piece));
         if(checkForCheck)
-            for([piece, moves] in Object.entries(validMoves))
-                for(i=0; i<moves.length; i++){
+            for(piece in validMoves){
+                moves = validMoves[piece];
+                for(move of moves){
                     let board = new Board(this._fen);
-                    board.makeMove(piece, moves[i]);
+                    board.makeMove(piece, move);
+                    board.player = this.player;
                     if(!board.isCheck())
-                        if(legalMoves.hasOwnProperty(piece))
-                            legalMoves[piece].push(moves[i]);
+                        if(legalMoves[piece])
+                            legalMoves[piece].push(move);
                         else
-                            legalMoves[piece] = [moves[i]];
+                            legalMoves[piece] = [move];
 
                 }
+            }
         else
-            legalMoves = validMoves;
+            return validMoves;
 
         return legalMoves;
     }
@@ -366,7 +370,7 @@ class Board{
     findPiece(piece){
         // Case sensitive(small for black, big for white)
         for(i=0; i<64; i++)
-            if(this.array[i].type == piece)
+            if(this.array[i]?.type == piece)
                 return i;
     }
 
