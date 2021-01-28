@@ -1,15 +1,22 @@
 {
-  "name": "chess",
+  "name": "chess-react",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "client": "cd client && yarn start",
+    "server": "nodemon server.js",
+    "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\""
   },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "express": "^4.17.1",
-    "socket.io": "^3.1.0"
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4"
+  },
+  "devDependencies": {
+    "concurrently": "^4.0.1"
+  },
+  "workspaces": {
+    "packages": [
+        "client",
+        "common"
+    ]
   }
 }

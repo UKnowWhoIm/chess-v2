@@ -7,17 +7,17 @@ const Players = {
     "b": 1
 }
 
-hasLowerCase = (str) => String(str).toUpperCase() != str;
+function hasLowerCase(str){return String(str).toUpperCase() != str;}
 
-getCoordinates = (position) => [Math.floor(position / 8), (position % 8)];
+function getCoordinates(position){return [Math.floor(position / 8), (position % 8)];}
 
-getPosition = (coordinates) => coordinates[0] * 8 + coordinates[1];
+function getPosition(coordinates){return coordinates[0] * 8 + coordinates[1];}
 
-addCoordinates = (cood1, cood2) => [cood1[0]*1 + cood2[0], cood1[1]*1 + cood2[1]];
+function addCoordinates(cood1, cood2){return [cood1[0]*1 + cood2[0], cood1[1]*1 + cood2[1]];}
 
-isLeftEdge = (position) => position % 8 == 0;
+function isLeftEdge(position){return position % 8 == 0;}
 
-isRightEdge = (position) => position % 8 == 7;
+function isRightEdge(position){return position % 8 == 7;}
 
 function getLocationFromNotation(notation){
     // e6 -> [2, 4]
@@ -38,7 +38,7 @@ function playerMultiplier(player){
 }
 
 function checkOutOfBounds(currentCoordinate, nextCoordinate){
-    resultCoordinate = addCoordinates(currentCoordinate, nextCoordinate);
+    let resultCoordinate = addCoordinates(currentCoordinate, nextCoordinate);
 
     if(resultCoordinate[0] > 7 || resultCoordinate[1] > 7)
         return true;
@@ -182,7 +182,7 @@ class King extends Piece{
         if(board.castleData[board.player]['q'])
             if(board.array[position - 1] == null && board.array[position - 2] == null  && board.array[position - 3]
                 && !board.isCheck())
-                    moves.push(pos - 2);
+                    moves.push(position - 2);
         
         return moves;
     }
@@ -199,7 +199,7 @@ const PieceMap = {
 
 // Board Class
 
-class Board{
+export class Board{
     constructor(fenRepresentation){
         this.array = [];
         this.player = null;
@@ -277,7 +277,7 @@ class Board{
 
         // Moves that change other pieces too
         // En Passant
-        if(piece.type.toLowerCase() == "p" && Math.abs(from - to) == 7 || Math.abs(from - to) == 9)
+        if(piece.type.toLowerCase() == "p" && (Math.abs(from - to) == 7 || Math.abs(from - to) == 9))
             if(this.array[to] == null)
                 this.array[to - playerMultiplier(this.player) * 8] = null;
 
@@ -285,13 +285,13 @@ class Board{
         if(piece.type.toLowerCase() == "k"){
             if(from - to == 2){
                 // Queen
-                board.array[from - 1] = board.array[from - 4];
-                board.array[from - 4] = null;
+                this.array[from - 1] = this.array[from - 4];
+                this.array[from - 4] = null;
             }
             else if(from - to == -2){
                 // King
-                board.array[from + 1] = board.array[from + 3];
-                board.array[from + 3] = null;
+                this.array[from + 1] = this.array[from + 3];
+                this.array[from + 3] = null;
             }
         }
 
@@ -303,7 +303,7 @@ class Board{
         
         // Castle
         if(piece.type.toLowerCase() == "k")
-            this.castleData[this.player] == {"k": false, "q":false};
+            this.castleData[this.player] = {"k": false, "q":false};
         
         if(piece.type.toLowerCase() == "r")
             if(from % 8 == 0)
@@ -369,7 +369,7 @@ class Board{
 
     findPiece(piece){
         // Case sensitive(small for black, big for white)
-        for(i=0; i<64; i++)
+        for(let i=0; i<64; i++)
             if(this.array[i]?.type == piece)
                 return i;
     }
