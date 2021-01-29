@@ -20,9 +20,15 @@ isLeftEdge = (position) => position % 8 == 0;
 isRightEdge = (position) => position % 8 == 7;
 
 function getLocationFromNotation(notation){
-    // e6 -> [2, 4]
+    // e6 -> [2, 4] -> 20
     const col = {"a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7};
-    return [ 8 - String.parseInt(notation[1]) , col[notation[0]]];
+    return getPosition([8 - Number.parseInt(notation[1]) , col[notation[0]]]);
+}
+
+function getNotationFromPosition(position){
+    // 20 -> [2, 4] -> e6
+    let coordinate = getCoordinates(position);
+    return String.fromCharCode(coordinate[1] + 97) + String(8 - coordinate[0]) ;
 }
 
 function changePlayer(player){
@@ -246,8 +252,6 @@ class Board{
             return getLocationFromNotation(enPassatString);
     }
 
-    
-
     getFENPieces(pieceData){
         let board = [];
         for(var i=0; i < pieceData.length; i++){
@@ -299,8 +303,12 @@ class Board{
         // En Passant
         if(piece.type.toLowerCase() == "p")
             if(Math.abs(from - to) == 16)
-                this.enPassantSquare = -1 * playerMultiplier(this.player) * 8;
-        
+                this.enPassantSquare = Number.parseInt(to) + playerMultiplier(changePlayer(this.player)) * 8;
+            else
+                this.enPassantSquare = null;
+        else
+            this.enPassantSquare = null;
+
         // Castle
         if(piece.type.toLowerCase() == "k")
             this.castleData[this.player] == {"k": false, "q":false};
@@ -326,7 +334,7 @@ class Board{
 
         this.array[to] = this.array[from]
         this.array[from] = null;
-
+        this._fen = this.boardToFEN();
     }
 
     isCheck(){
@@ -334,7 +342,7 @@ class Board{
         let kingPos = this.findPiece(this.getKing());
         let nextMoves = this.getNextMoves(false, changePlayer(this.player));
         for(piece in nextMoves)
-            if(kingPos in nextMoves[piece])
+            if(nextMoves[piece].includes(kingPos))
                 return true;
         return false;
     }
@@ -353,12 +361,14 @@ class Board{
                     let board = new Board(this._fen);
                     board.makeMove(piece, move);
                     board.player = this.player;
-                    if(!board.isCheck())
+                    if(!board.isCheck()){
                         if(legalMoves[piece])
                             legalMoves[piece].push(move);
                         else
                             legalMoves[piece] = [move];
-
+                    }
+                    else
+                        console.log("WTF");
                 }
             }
         else
@@ -387,13 +397,13 @@ class Board{
             if(i % 8 == 0){
                 if(blankSpaces)
                     fen += String(blankSpaces);
-                this.blankSpaces = 0;
+                blankSpaces = 0;
                 fen += "/"
             }
             if(this.array[i]){
                 if(blankSpaces)
                     fen += String(blankSpaces);
-                this.blankSpaces = 0;
+                blankSpaces = 0;
                 fen += this.array[i].type;
             }
             else
@@ -417,16 +427,16 @@ class Board{
             castleString += "k";
         if(this.castleData[Players.black]['q'])
             castleString += "q";
+       
         fen += castleString;
-        if(castleString)
+        if(!castleString)
             // Blank
             fen += "-";
 
         fen += ' ';
         
         if(this.enPassantSquare)
-            // TODO convert to notation
-            fen += ""
+            fen += getNotationFromPosition(this.enPassantSquare);
         else
             // Blank
             fen += "-";
