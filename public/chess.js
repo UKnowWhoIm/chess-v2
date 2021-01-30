@@ -134,13 +134,14 @@ class Pawn extends Piece{
         startingCol[Players.white] = 6;
         startingCol[Players.black] = 1;
         if(startingCol[this.player] == Math.floor(position / 8))
-            moves.push(position + playerMultiplier(this.player) * 16);
+            if(!board.array[position + playerMultiplier(this.player) * 16])
+                moves.push(position + playerMultiplier(this.player) * 16);
 
         if(board.enPassantSquare){
             let nextRow = playerMultiplier(this.player) * 8;
-            
-            if(board.enPassantSquare == nextRow + 1 && !isRightEdge(position) || 
-            board.enPassantSquare == nextRow - 1 && !isLeftEdge(position))
+
+            if(board.enPassantSquare == position + nextRow + 1 && !isRightEdge(position) || 
+            board.enPassantSquare == position + nextRow - 1 && !isLeftEdge(position))
                 
                 moves.push(board.enPassantSquare);
         }

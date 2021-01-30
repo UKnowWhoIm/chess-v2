@@ -79,11 +79,11 @@
             }
             table.appendChild(currentRow);
             $("#board").append(table);
+            console.log("coords" , getCoordinates(board.enPassantSquare), board.enPassantSquare);
         }
   
         function highlightMoves(index){
             let moves = board.array[index].getAllMoves(board, index);
-            console.log(moves);
             for(move of moves)
                 $("#"+String(move)).addClass("highlight");
         }
@@ -106,13 +106,12 @@
                 unselect();
             else if(selectedPiece == null && board.array[index] && board.player == board.array[index].player)
                 select(index);
-            else if(board.array[index]?.player == changePlayer(board.player))
+            else if(selectedPiece == null && board.array[index]?.player == changePlayer(board.player))
                 unselect();
             else if(board.array[index]?.player == board.player)
                 select(index);
             else if(selectedPiece != null){
                 let legalMoves = board.getNextMoves();
-                console.log(legalMoves);
                 if(legalMoves[selectedPiece].includes(Number.parseInt(index))){
                     board.makeMove(selectedPiece, index);
                 }
