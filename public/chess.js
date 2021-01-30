@@ -83,15 +83,19 @@ class Piece{
         let moves = [], move;
         for(move of this.nextNormalMoves){
             if(!checkOutOfBounds(positionCoord, move)){
-                if(this.nextCaptureMoves && board.array[getPosition(addCoordinates(move, positionCoord))])
+                if(this.nextCaptureMoves != [] && board.array[getPosition(addCoordinates(move, positionCoord))])
                     continue;
                 if(this.multipleMoves){
-                    for(var pos = positionCoord; !checkOutOfBounds(pos, move); pos = addCoordinates(move, pos))
+                    for(var pos = positionCoord; !checkOutOfBounds(pos, move); pos = addCoordinates(move, pos)){
                         if((board.array[getPosition(addCoordinates(move, pos))]?.player) != board.player)
                             moves.push(getPosition(addCoordinates(move, pos)));
+                        if(board.array[getPosition(addCoordinates(move, pos))] != null)
+                            // Encountered a piece
+                            break;
+                    }
                 }
                 else
-                    if(board.array[move + pos]?.player != board.player)
+                    if(board.array[addCoordinates(move, positionCoord)]?.player != board.player)
                         moves.push(getPosition(addCoordinates(move, positionCoord)));
             }
         }
@@ -338,10 +342,13 @@ class Board{
         this._fen = this.boardToFEN();
     }
 
-    isCheck(){
+    isCheck(player=this.player){
         let piece;
-        let kingPos = this.findPiece(this.getKing());
-        let nextMoves = this.getNextMoves(false, changePlayer(this.player));
+        let kingPos = this.getKing(player);
+        if(!kingPos)
+            // King is captured(Should NEVER Happen)
+            return true;
+        let nextMoves = this.getNextMoves(false, changePlayer(player));
         for(piece in nextMoves)
             if(nextMoves[piece].includes(kingPos))
                 return true;
@@ -351,7 +358,7 @@ class Board{
     getNextMoves(checkForCheck=true, player=this.player){
         // Outputs as pos64 
         let pieces = this.getAllPieces(player);
-        let piece, moves, move;
+        let piece, moves, move, board;
         let validMoves = {};
         let legalMoves = {};
         pieces.forEach(piece => validMoves[piece] = this.array[piece].getAllMoves(this, piece));
@@ -359,17 +366,16 @@ class Board{
             for(piece in validMoves){
                 moves = validMoves[piece];
                 for(move of moves){
-                    let board = new Board(this._fen);
+                    board = new Board(this._fen);
                     board.makeMove(piece, move);
-                    board.player = this.player;
-                    if(!board.isCheck()){
+                    if(!board.isCheck(player)){
                         if(legalMoves[piece])
                             legalMoves[piece].push(move);
                         else
                             legalMoves[piece] = [move];
                     }
                     else
-                        console.log("WTF");
+                        console.log(move);
                 }
             }
         else
@@ -378,24 +384,23 @@ class Board{
         return legalMoves;
     }
 
-    findPiece(piece){
-        // Case sensitive(small for black, big for white)
+    getKing(player=this.player){
+        let target;
+        if(player == Players.black)
+            target = "k";
+        else
+            target = "K";
         for(i=0; i<64; i++)
-            if(this.array[i]?.type == piece)
+            if(this.array[i]?.type == target)
                 return i;
-    }
 
-    getKing(){
-        if(this.player == Players.black)
-            return "k";
-        return "K";
     }
 
     boardToFEN(){
         let blankSpaces = 0, fen = "";
 
         for(var i=0; i<64; i++){
-            if(i % 8 == 0){
+            if(i % 8 == 0 && i != 0){
                 if(blankSpaces)
                     fen += String(blankSpaces);
                 blankSpaces = 0;

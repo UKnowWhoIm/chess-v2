@@ -53,6 +53,7 @@
         }
         const initialFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
         var board = new Board(initialFen);
+        let nextMoves = [];
         let selectedPiece;
   
         function boardToHTML(){
@@ -79,13 +80,14 @@
             }
             table.appendChild(currentRow);
             $("#board").append(table);
-            console.log("coords" , getCoordinates(board.enPassantSquare), board.enPassantSquare);
+            nextMoves = board.getNextMoves();
         }
   
         function highlightMoves(index){
-            let moves = board.array[index].getAllMoves(board, index);
-            for(move of moves)
-                $("#"+String(move)).addClass("highlight");
+            let moves = nextMoves[index];
+            if(moves)
+                for(move of moves)
+                    $("#"+String(move)).addClass("highlight");
         }
   
         function unselect(){
@@ -111,8 +113,9 @@
             else if(board.array[index]?.player == board.player)
                 select(index);
             else if(selectedPiece != null){
-                let legalMoves = board.getNextMoves();
-                if(legalMoves[selectedPiece].includes(Number.parseInt(index))){
+                if(!nextMoves[selectedPiece])
+                    unselect();
+                if(nextMoves[selectedPiece].includes(Number.parseInt(index))){
                     board.makeMove(selectedPiece, index);
                 }
                 selectedPiece = null;
