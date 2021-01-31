@@ -83,7 +83,7 @@ class Piece{
         let moves = [], move;
         for(move of this.nextNormalMoves){
             if(!checkOutOfBounds(positionCoord, move)){
-                if(this.nextCaptureMoves != [] && board.array[getPosition(addCoordinates(move, positionCoord))])
+                if(this.nextCaptureMoves != null && board.array[getPosition(addCoordinates(move, positionCoord))])
                     continue;
                 if(this.multipleMoves){
                     for(var pos = positionCoord; !checkOutOfBounds(pos, move); pos = addCoordinates(move, pos)){
@@ -94,15 +94,18 @@ class Piece{
                             break;
                     }
                 }
-                else
-                    if(board.array[addCoordinates(move, positionCoord)]?.player != board.player)
+                else{
+                    if(board.array[getPosition(addCoordinates(move, positionCoord))]?.player != board.player){
                         moves.push(getPosition(addCoordinates(move, positionCoord)));
+                    }
+                }
             }
         }
         // Capture Moves(Pawn)
-        for(move of this.nextCaptureMoves)
-            if(!checkOutOfBounds(position, move) && board.array[getPosition(addCoordinates(move, positionCoord))]?.player == changePlayer(board.player))
-                moves.push(getPosition(addCoordinates(move, positionCoord)));
+        if(this.nextCaptureMoves != null)
+            for(move of this.nextCaptureMoves)
+                if(!checkOutOfBounds(position, move) && board.array[getPosition(addCoordinates(move, positionCoord))]?.player == changePlayer(board.player))
+                    moves.push(getPosition(addCoordinates(move, positionCoord)));
 
         moves.push(...this.getSpecialMoves(board, position));
         return moves;
@@ -120,7 +123,7 @@ class Piece{
 
 class Pawn extends Piece{
     constructor(type){
-        super(type, [], [], false);
+        super(type, [], null, false);
         this.setNextMoves();
     }
 
@@ -156,31 +159,31 @@ class Pawn extends Piece{
 
 class Knight extends Piece{
     constructor(type){
-        super(type, [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [2, -1], [2, 1]], [], false);
+        super(type, [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [2, -1], [2, 1], [1, 2], [1, -2]], null, false);
     }
 }
 
 class Bishop extends Piece{
     constructor(type){
-        super(type, [[1, -1], [-1, 1], [-1, -1], [1, 1]], [], true);
+        super(type, [[1, -1], [-1, 1], [-1, -1], [1, 1]], null, true);
     }
 }
 
 class Rook extends Piece{
     constructor(type){
-        super(type, [[1, 0], [-1, 0], [0, -1], [0, 1]], [], true);
+        super(type, [[1, 0], [-1, 0], [0, -1], [0, 1]], null, true);
     }
 }
 
 class Queen extends Piece{
     constructor(type){
-        super(type, [[1, 0], [-1, 0], [0, -1], [0, 1], [1, -1], [-1, 1], [-1, -1], [1, 1]], [], true);
+        super(type, [[1, 0], [-1, 0], [0, -1], [0, 1], [1, -1], [-1, 1], [-1, -1], [1, 1]], null, true);
     }
 }
 
 class King extends Piece{
     constructor(type){
-        super(type, [[1, 0], [-1, 0], [0, -1], [0, 1], [1, -1], [-1, 1], [-1, -1], [1, 1]], [], false);
+        super(type, [[1, 0], [-1, 0], [0, -1], [0, 1], [1, -1], [-1, 1], [-1, -1], [1, 1]], null, false);
     }
 
     getSpecialMoves(board, position){
