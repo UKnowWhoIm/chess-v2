@@ -80,6 +80,7 @@
             }
             table.appendChild(currentRow);
             $("#board").append(table);
+
             nextMoves = board.getNextMoves();
         }
   
@@ -125,6 +126,7 @@
 
         function postMove(){
             boardToHTML();
+            nextMoves = board.getNextMoves();
 
             let gameOver = board.checkGameOver();
             if(gameOver == 1)

@@ -141,7 +141,7 @@ class Pawn extends Piece{
         startingCol[Players.white] = 6;
         startingCol[Players.black] = 1;
         if(startingCol[this.player] == Math.floor(position / 8))
-            if(!board.array[position + playerMultiplier(this.player) * 16])
+            if(!board.array[position + playerMultiplier(this.player) * 16] && !board.array[position + playerMultiplier(this.player) * 8])
                 moves.push(position + playerMultiplier(this.player) * 16);
 
         if(board.enPassantSquare){
@@ -193,12 +193,12 @@ class King extends Piece{
         let moves = [];
         if(board.castleData[this.player]['k'])
             if(board.array[position + 1] == null && board.array[position + 2] == null 
-                && !board.isCheck())
+                && !board.isCheck(this.player))
                     moves.push(position + 2);
         
         if(board.castleData[this.player]['q'])
             if(board.array[position - 1] == null && board.array[position - 2] == null  && board.array[position - 3]
-                && !board.isCheck())
+                && !board.isCheck(this.player))
                     moves.push(pos - 2);
         
         return moves;
@@ -289,13 +289,12 @@ class Board{
     makeMove(from, to){
         // Takes pos64
         let piece = this.array[from];
-
         // Moves that change other pieces too
         // En Passant
-        if(piece.type.toLowerCase() == "p" && Math.abs(from - to) == 7 || Math.abs(from - to) == 9)
+        if(piece.type.toLowerCase() === "p" && (Math.abs(from - to) === 7 || Math.abs(from - to) === 9))
             if(this.array[to] == null)
                 this.array[to - playerMultiplier(this.player) * 8] = null;
-
+        
         // Castling
         if(piece.type.toLowerCase() == "k"){
             if(from - to == 2){
