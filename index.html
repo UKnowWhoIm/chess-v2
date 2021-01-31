@@ -119,8 +119,21 @@
                     board.makeMove(selectedPiece, index);
                 }
                 selectedPiece = null;
-                boardToHTML();
+                postMove();
             }
+        }
+
+        function postMove(){
+            boardToHTML();
+
+            let gameOver = board.checkGameOver();
+            if(gameOver == 1)
+                alert(changePlayer(board.player) + " Won");
+            else if(gameOver == -1)
+                alert("Game is drawn");
+            else
+                if(board.isCheck())
+                    alert("You're in check");
         }
 
         $("#board").delegate("td", "click", function(){

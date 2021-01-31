@@ -87,7 +87,7 @@ class Piece{
                     continue;
                 if(this.multipleMoves){
                     for(var pos = positionCoord; !checkOutOfBounds(pos, move); pos = addCoordinates(move, pos)){
-                        if((board.array[getPosition(addCoordinates(move, pos))]?.player) != board.player)
+                        if((board.array[getPosition(addCoordinates(move, pos))]?.player) != this.player)
                             moves.push(getPosition(addCoordinates(move, pos)));
                         if(board.array[getPosition(addCoordinates(move, pos))] != null)
                             // Encountered a piece
@@ -95,7 +95,7 @@ class Piece{
                     }
                 }
                 else{
-                    if(board.array[getPosition(addCoordinates(move, positionCoord))]?.player != board.player){
+                    if(board.array[getPosition(addCoordinates(move, positionCoord))]?.player != this.player){
                         moves.push(getPosition(addCoordinates(move, positionCoord)));
                     }
                 }
@@ -104,7 +104,7 @@ class Piece{
         // Capture Moves(Pawn)
         if(this.nextCaptureMoves != null)
             for(move of this.nextCaptureMoves)
-                if(!checkOutOfBounds(position, move) && board.array[getPosition(addCoordinates(move, positionCoord))]?.player == changePlayer(board.player))
+                if(!checkOutOfBounds(positionCoord, move) && board.array[getPosition(addCoordinates(move, positionCoord))]?.player == changePlayer(this.player))
                     moves.push(getPosition(addCoordinates(move, positionCoord)));
 
         moves.push(...this.getSpecialMoves(board, position));
@@ -163,37 +163,40 @@ class Knight extends Piece{
     }
 }
 
+const diagonalMoves = [[1, -1], [-1, 1], [-1, -1], [1, 1]];
+const horizontalMoves = [[1, 0], [-1, 0], [0, -1], [0, 1]];
+
 class Bishop extends Piece{
     constructor(type){
-        super(type, [[1, -1], [-1, 1], [-1, -1], [1, 1]], null, true);
+        super(type, diagonalMoves, null, true);
     }
 }
 
 class Rook extends Piece{
     constructor(type){
-        super(type, [[1, 0], [-1, 0], [0, -1], [0, 1]], null, true);
+        super(type, horizontalMoves, null, true);
     }
 }
 
 class Queen extends Piece{
     constructor(type){
-        super(type, [[1, 0], [-1, 0], [0, -1], [0, 1], [1, -1], [-1, 1], [-1, -1], [1, 1]], null, true);
+        super(type, horizontalMoves.concat(diagonalMoves), null, true);
     }
 }
 
 class King extends Piece{
     constructor(type){
-        super(type, [[1, 0], [-1, 0], [0, -1], [0, 1], [1, -1], [-1, 1], [-1, -1], [1, 1]], null, false);
+        super(type, horizontalMoves.concat(diagonalMoves), null, false);
     }
 
     getSpecialMoves(board, position){
         let moves = [];
-        if(board.castleData[board.player]['k'])
+        if(board.castleData[this.player]['k'])
             if(board.array[position + 1] == null && board.array[position + 2] == null 
                 && !board.isCheck())
                     moves.push(position + 2);
         
-        if(board.castleData[board.player]['q'])
+        if(board.castleData[this.player]['q'])
             if(board.array[position - 1] == null && board.array[position - 2] == null  && board.array[position - 3]
                 && !board.isCheck())
                     moves.push(pos - 2);
@@ -358,6 +361,21 @@ class Board{
         return false;
     }
 
+    checkGameOver(player){
+        let moves = this.getNextMoves(true, player);
+        if(Object.keys(moves).length === 0){
+            // Game Over
+            if(this.isCheck())
+                // Checkmate
+                return 1;
+            // Stalemate
+            return -1;
+        }
+        // TODO > 50 halfmoves result in draw
+        // Game Continues
+        return 0;
+    }
+
     getNextMoves(checkForCheck=true, player=this.player){
         // Outputs as pos64 
         let pieces = this.getAllPieces(player);
@@ -377,8 +395,6 @@ class Board{
                         else
                             legalMoves[piece] = [move];
                     }
-                    else
-                        console.log(move);
                 }
             }
         else
