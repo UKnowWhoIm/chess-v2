@@ -477,5 +477,3 @@ class Board{
     }
 
 }
-
-exports.Board = Board;

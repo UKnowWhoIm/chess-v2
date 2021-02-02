@@ -1,5 +1,5 @@
 const db = require("./dbCrud");
-const chess = require("./public/chess");
+const chess = require("./chess_es5");
 
 function eventHandler(io, socket){
     socket.on("roomCreate", function(){

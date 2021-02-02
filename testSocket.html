@@ -16,7 +16,7 @@
             });
             socket.on("invalidRoomId", () => alert("XYZ"));
             socket.on("roomFull", () => alert("FULL"));
-            socket.on("startGame", () => console.log("start game"));
+            socket.on("startGame", (val) => console.log("start game", val));
             socket.on("joinedRoom", () => console.log("joined room"));
         </script>
     </head>
