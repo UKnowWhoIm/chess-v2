@@ -1,17 +1,21 @@
-const express = require("express");
-const app = express();
-const path = require('path');
-const http = require('http').createServer(app);
-const io = require('socket.io')(http);
-const dbCrud = require("./dbCrud");
+var express = require('express'), http = require('http');
+const socketEvents = require("./socketEvents");
+var path = require("path");
+var app = express();
+var server = http.createServer(app);
+const io = require('socket.io')(server);
+const db = require("./dbCrud");
+server.listen(3000);
  
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
 
-app.use('/static', express.static(path.join(__dirname, '/public')));
-
-
-http.listen(3000, () => {
-  console.log('listening on *:3000');
+app.get('/test', (req, res) => {
+    res.sendFile(__dirname + '/testSocket.html');
 });
+
+app.use('/static', express.static(path.join(__dirname, '/public')));
+//app.use('/socket.io', express.static(path.join(__dirname, '/node_modules/socket.io/client-dist')));
+
+io.on("connection", socket => socketEvents(io, socket));

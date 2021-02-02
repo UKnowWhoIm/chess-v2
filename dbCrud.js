@@ -9,12 +9,12 @@ const clWaitingRoom = "WaitingRoom";
 const initialFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0";
 
 async function getDBObject(){
-    var conn = await MongoClient.connect(url);
+    var conn = await MongoClient.connect(url, {useNewUrlParser: true, useUnifiedTopology: true});
     return {"db": conn.db(db), "conn": conn};
 }
 
-async function createGameRoom(clients){
-    room = {"clients": clients, "board": initialFen, "nextMoves": []};
+async function createGameRoom(){
+    room = {"white": "", "black": "", "board": initialFen};
     let dbObj = await getDBObject();
     let obj = await dbObj.db.collection(clGameRooms).insertOne(room);
     dbObj.conn.close();
@@ -28,9 +28,18 @@ async function readGameRoom(id){
     return obj;
 }
 
-async function updateGameRoom(id, board, nextMoves){
+async function updateGameRoom(id, board, white, black){
     let dbObj = await getDBObject();
-    await dbObj.db.collection(clGameRooms).updateOne({"_id": id}, {$set: {"board": board, "nextMoves": nextMoves}}, { "upsert": true });
+    let updateData = {};
+
+    if(board)
+        updateData["board"] = board;
+    if(white)
+        updateData["white"] = white;
+    if(black)
+        updateData["black"] = black;
+    
+    await dbObj.db.collection(clGameRooms).updateOne({"_id": id}, {$set: updateData}, { "upsert": true });
     dbObj.conn.close();
 }
 
@@ -73,4 +82,4 @@ exports.createGameRoom = createGameRoom;
 exports.readGameRoom = readGameRoom;
 exports.updateGameRoom = updateGameRoom;
 exports.deleteGameRoom = deleteGameRoom;
-
+exports.initialFen = initialFen;

@@ -224,7 +224,7 @@ class Board{
         this.castleData = null;
         this.halfMoves =  0;
         this.fullMoves = 0;
-        this._fen = fenRepresentation;
+        this.fen = fenRepresentation;
         this.fenToBoard(fenRepresentation);
     }
     
@@ -344,7 +344,7 @@ class Board{
 
         this.array[to] = this.array[from]
         this.array[from] = null;
-        this._fen = this.boardToFEN();
+        this.fen = this.boardToFEN();
     }
 
     isCheck(player=this.player){
@@ -386,7 +386,7 @@ class Board{
             for(piece in validMoves){
                 moves = validMoves[piece];
                 for(move of moves){
-                    board = new Board(this._fen);
+                    board = new Board(this.fen);
                     board.makeMove(piece, move);
                     if(!board.isCheck(player)){
                         if(legalMoves[piece])
@@ -477,3 +477,5 @@ class Board{
     }
 
 }
+
+exports.Board = Board;
