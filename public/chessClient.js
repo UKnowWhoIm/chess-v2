@@ -58,6 +58,10 @@ const pieceToText = {
       $(".highlight").removeClass("highlight");
   }
 
+  function getCurrentPlayer(){
+      return sessionStorage.getItem("player");
+  }
+
   function select(index){
       unselect();
       $("#" + index).addClass("selected");
@@ -68,17 +72,17 @@ const pieceToText = {
   function processClick(socket, index){
       if(selectedPiece === index)
           unselect();
-      else if(selectedPiece == null && board.array[index] && board.player == board.array[index].player)
+      else if(selectedPiece == null && board.array[index] && board.player == getCurrentPlayer() && board.player == board.array[index].player)
           select(index);
-      else if(selectedPiece == null && board.array[index]?.player == changePlayer(board.player))
+      else if(selectedPiece == null && board.array[index]?.player == changePlayer(getCurrentPlayer()))
           unselect();
-      else if(board.array[index]?.player == board.player)
+      else if(board.array[index]?.player == getCurrentPlayer() && board.player == getCurrentPlayer())
           select(index);
       else if(selectedPiece != null){
           if(!nextMoves[selectedPiece])
               unselect();
           if(nextMoves[selectedPiece].includes(Number.parseInt(index))){
-              socket.emit("makeMove", localStorage.getItem("gameId"), selectedPiece, index);
+              socket.emit("makeMove", sessionStorage.getItem("gameId"), selectedPiece, index);
           }
           selectedPiece = null;
       }
@@ -87,13 +91,6 @@ const pieceToText = {
   function postMove(){
       boardToHTML();
       nextMoves = board.getNextMoves();
-
-      let gameOver = board.checkGameOver();
-      if(gameOver == 1)
-          alert(changePlayer(board.player) + " Won");
-      else if(gameOver == -1)
-          alert("Game is drawn");
-      else
-          if(board.isCheck())
-              alert("You're in check");
+      if(board.isCheck(sessionStorage.getItem("player")))
+          alert("You're in check");
   }

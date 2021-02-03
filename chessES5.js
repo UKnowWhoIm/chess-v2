@@ -477,3 +477,4 @@ class Board{
 }
 
 exports.Board = Board;
+exports.Players = Players;

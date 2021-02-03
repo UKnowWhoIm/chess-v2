@@ -41,24 +41,41 @@
     <script>
         let socket = io();
         socket.on("getGameId", function(gameId){
-            localStorage.setItem("gameId", gameId);
+            sessionStorage.setItem("gameId", gameId);
             console.log(gameId);
         });
 
-        socket.on("startGame", function(fen){
+        socket.on("startGame", (fen) => {
             console.log(fen);
             board = new Board(fen);
             postMove();
         });
 
-        socket.on("boardUpdated", function(fen){
+        socket.on("boardUpdated", (fen) => {
             console.log(fen);
             board = new Board(fen);
             postMove();
+            if(board.player == sessionStorage.getItem("player"))
+                alert("Your Turn");
+        });
+
+        socket.on("playerColor", (player) => {
+            sessionStorage.setItem("player", player);
+            if(player == Players.white)
+                alert("You\'re playing as white");
+            else
+                alert("You\'re playing as black");
         });
 
         socket.on("playerJoined", () => alert("A Player has joined"));
-      
+
+        socket.on("invalidMove", () => alert("That move isn\'t allowed"));
+
+        socket.on("invalidRoomId", (silent) => {
+            if(!silent)
+                alert("Invalid Room Id");
+        });
+        
         $("#board").delegate("td", "click", function(){
             processClick(socket, this.id);
         });
@@ -70,6 +87,12 @@
         function joinRoom(id){
             socket.emit("roomJoin", id);
         }
+
+        $(document).ready(function(){
+            let roomId = sessionStorage.getItem("gameId");
+            if(roomId)
+                socket.emit("roomJoin", roomId, true);
+        })
       </script>
   </body>
 </html>
