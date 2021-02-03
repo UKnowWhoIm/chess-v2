@@ -84,6 +84,19 @@
             postMove(Players);
             setPlayer();
         }
+
+        function handleVictory(){
+            $("#player").text("You have won");
+        }
+
+        function handleLoss(){
+            $("#player").text("You have lost");
+        }
+
+        function handleDraw(){
+            $("#player").text("The game has been drawn");
+        }
+
         socket.on("getGameId", function(gameId){
             sessionStorage.setItem("gameId", gameId);
             $("#roomId").text(gameId);
@@ -119,6 +132,15 @@
         socket.on("invalidRoomId", () => {
             alert("Invalid Room Id");
         });
+
+        socket.on("victory", (player) => {
+            if(getThisPlayer() == player)
+                handleVictory();
+            else
+                handleLoss();
+        });
+
+        socket.on("draw", () => handleDraw());
 
         $("#board").delegate("td", "click", function(){
             processClick(socket, this.id);

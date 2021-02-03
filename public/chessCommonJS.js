@@ -360,19 +360,20 @@ class Board{
         return false;
     }
 
-    checkGameOver(player){
-        let moves = this.getNextMoves(true, player);
-        if(Object.keys(moves).length === 0){
-            // Game Over
-            if(this.isCheck())
-                // Checkmate
-                return 1;
-            // Stalemate
-            return -1;
-        }
-        // TODO > 50 halfmoves result in draw
-        // Game Continues
-        return 0;
+    checkVictory(player=this.player){
+        return this.isCheck(changePlayer(player)) && Object.keys(this.getNextMoves(true, changePlayer(player))).length === 0;
+    }
+
+    checkStaleMate(currentPlayer){
+        return !this.isCheck(currentPlayer) && Object.keys(this.getNextMoves(true, currentPlayer)).length === 0;
+    }
+
+    checkDraw(){
+        if(this.checkStaleMate(Players.white) || this.checkStaleMate(Players.black))
+            return true;
+        if(this.halfMoves >= 50)
+            return true;
+        // TODO Insufficent Material
     }
 
     getNextMoves(checkForCheck=true, player=this.player){

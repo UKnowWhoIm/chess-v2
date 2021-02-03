@@ -82,7 +82,27 @@ function eventHandler(io, socket){
             if(nexMoves.hasOwnProperty(from) && nexMoves[from].includes(to)){
                 boardObj.makeMove(from, to);
                 db.updateGameRoom(gameId, boardObj.fen);
+                
+                let winner, gameOver;
+                
+                if(boardObj.checkVictory(chess.Players.white))
+                    winner = chess.Players.white;
+                else if(boardObj.checkVictory(chess.Players.black))
+                    winner = chess.Players.black;
+
                 io.to(gameId).emit("boardUpdated", boardObj.fen);
+                
+                if(winner != null && boardObj.checkDraw()){
+                    io.to(gameId).emit("draw");
+                    gameOver = true;
+                }
+                else if(winner != null){
+                    io.to(gameId).emit("victory", winner);
+                    gameOver = true;
+                }
+                // As game is Over
+                if(gameOver) 
+                    db.deleteGameRoom(gameId);
                 return;
             }
         }
