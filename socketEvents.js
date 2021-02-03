@@ -1,5 +1,5 @@
 const db = require("./dbCrud");
-const chess = require("./chess_es5");
+const chess = require("./chessES5");
 
 function eventHandler(io, socket){
     socket.on("roomCreate", function(){
@@ -17,9 +17,10 @@ function eventHandler(io, socket){
                 socket.emit("roomFull");
             else{
                 socket.join(roomId);
+                socket.emit("getGameId", roomId);
                 io.to(roomId).emit("joinedRoom");
                 if(io.sockets.adapter.rooms.get(String(roomId)).size == 2)
-                    io.to(roomId).emit("startGame", {"fen": db.initialFen});
+                    io.to(roomId).emit("startGame", db.initialFen);
             }
         }
         else
@@ -29,10 +30,12 @@ function eventHandler(io, socket){
     socket.on("makeMove", async function(gameId, from, to){
         from = Number.parseInt(from);
         to = Number.parseInt(to);
+        console.log(gameId, from, to);
         let room = await db.readGameRoom(gameId);
-        let boardObj = chess.Board(room.board);
+        let boardObj = new chess.Board(room.board);
         let nexMoves = boardObj.getNextMoves();
-        if(nexMoves.hasOwnProperty(from) && nexMoves[from].contains(to)){
+        console.log(nexMoves[from]);
+        if(nexMoves.hasOwnProperty(from) && nexMoves[from].includes(to)){
             boardObj.makeMove(from, to);
             db.updateGameRoom(gameId, boardObj.fen);
             io.to(gameId).emit("boardUpdated", boardObj.fen);

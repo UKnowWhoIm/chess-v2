@@ -80,34 +80,33 @@ class Piece{
          */
         position = Number.parseInt(position);
         let positionCoord = getCoordinates(position);
-        let moves = [], move;
-        for(move of this.nextNormalMoves){
+        let moves = [];
+        this.nextNormalMoves.forEach((move) => {
             if(!checkOutOfBounds(positionCoord, move)){
-                if(this.nextCaptureMoves != null && board.array[getPosition(addCoordinates(move, positionCoord))])
-                    continue;
-                if(this.multipleMoves){
-                    for(var pos = positionCoord; !checkOutOfBounds(pos, move); pos = addCoordinates(move, pos)){
-                        if((board.array[getPosition(addCoordinates(move, pos))]?.player) != this.player)
-                            moves.push(getPosition(addCoordinates(move, pos)));
-                        if(board.array[getPosition(addCoordinates(move, pos))] != null)
-                            // Encountered a piece
-                            break;
+                if(this.nextCaptureMoves == null || board.array[getPosition(addCoordinates(move, positionCoord))] == null){                    
+                    if(this.multipleMoves){
+                        for(var pos = positionCoord; !checkOutOfBounds(pos, move); pos = addCoordinates(move, pos)){
+                            if(board.array[getPosition(addCoordinates(move, pos))] == null || board.array[getPosition(addCoordinates(move, pos))].player != this.player)
+                                moves.push(getPosition(addCoordinates(move, pos)));
+                            if(board.array[getPosition(addCoordinates(move, pos))] != null)
+                                // Encountered a piece
+                                break;
+                        }
                     }
-                }
-                else{
-                    if(board.array[getPosition(addCoordinates(move, positionCoord))]?.player != this.player){
+                    else if(board.array[getPosition(addCoordinates(move, positionCoord))] == null || board.array[getPosition(addCoordinates(move, positionCoord))].player != this.player)
                         moves.push(getPosition(addCoordinates(move, positionCoord)));
-                    }
                 }
             }
-        }
+        });
         // Capture Moves(Pawn)
         if(this.nextCaptureMoves != null)
-            for(move of this.nextCaptureMoves)
-                if(!checkOutOfBounds(positionCoord, move) && board.array[getPosition(addCoordinates(move, positionCoord))]?.player == changePlayer(this.player))
+            this.nextCaptureMoves.forEach(move =>{
+                if(!checkOutOfBounds(positionCoord, move) && board.array[getPosition(addCoordinates(move, positionCoord))] && board.array[getPosition(addCoordinates(move, positionCoord))].player == changePlayer(this.player))
                     moves.push(getPosition(addCoordinates(move, positionCoord)));
+            });
 
-        moves.push(...this.getSpecialMoves(board, position));
+        this.getSpecialMoves(board, position).forEach(move=>moves.push(move));
+
         return moves;
     }
 
@@ -281,7 +280,7 @@ class Board{
         // outputs pos64
         let pieces = [];
         for(var i=0; i<64; i++) 
-            if(this.array[i]?.player == player)
+            if(this.array[i] && this.array[i].player == player)
                 pieces.push(i);
         return pieces;
     }
@@ -385,7 +384,7 @@ class Board{
         if(checkForCheck)
             for(piece in validMoves){
                 moves = validMoves[piece];
-                for(move of moves){
+                moves.forEach(move => {
                     board = new Board(this.fen);
                     board.makeMove(piece, move);
                     if(!board.isCheck(player)){
@@ -394,7 +393,7 @@ class Board{
                         else
                             legalMoves[piece] = [move];
                     }
-                }
+                });
             }
         else
             return validMoves;
@@ -408,8 +407,8 @@ class Board{
             target = "k";
         else
             target = "K";
-        for(i=0; i<64; i++)
-            if(this.array[i]?.type == target)
+        for(let i=0; i<64; i++)
+            if(this.array[i] && this.array[i].type == target)
                 return i;
 
     }
@@ -475,5 +474,6 @@ class Board{
 
         return fen;
     }
-
 }
+
+exports.Board = Board;
