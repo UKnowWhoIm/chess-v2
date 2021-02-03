@@ -41,7 +41,7 @@ function eventHandler(io, socket){
         )
     });
     
-    socket.on("roomJoin", function(roomId, initial){
+    socket.on("roomJoin", function(roomId){
         if(io.sockets.adapter.rooms.has(String(roomId))){
             if(io.sockets.adapter.rooms.get(String(roomId)).size == 2)
                 socket.emit("roomFull");
@@ -52,18 +52,24 @@ function eventHandler(io, socket){
                 if(io.sockets.adapter.rooms.get(String(roomId)).size == 2){
                     assignRoom(roomId, io.sockets.adapter.rooms.get(String(roomId))).then(
                         playerData => {
-                            io.to(roomId).emit("startGame", db.initialFen);
                             io.to(playerData.white).emit("playerColor", chess.Players.white);
                             io.to(playerData.black).emit("playerColor", chess.Players.black);
+                            io.to(roomId).emit("startGame", db.initialFen);
                         }
                     );
                 }
             }
         }
-        else if(initial)
-            socket.emit("invalidRoomId", true);
         else
             socket.emit("invalidRoomId");
+    });
+
+    socket.on("reJoin", async function(roomId){
+        if(io.sockets.adapter.rooms.has(String(roomId))){
+            let room = await db.readGameRoom(roomId);
+            if(room.white == socket.id || room.black == socket.id)
+                socket.emit("reJoinSuccess", room.board);
+        }
     });
 
     socket.on("makeMove", async function(gameId, from, to){

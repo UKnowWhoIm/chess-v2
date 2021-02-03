@@ -17,10 +17,12 @@ const pieceToText = {
   let nextMoves = [];
   let selectedPiece;
 
-  function boardToHTML(){
+  function boardToHTML(blackPerspective=false){
       $("#board").html("");
       let table = document.createElement("table");
       let currentRow;
+      let trueIndex = blackPerspective ? 63 : 0;
+      let trueIndexModifier = blackPerspective ? -1 : 1;
       for(i=0; i<64; i++){
           if(i % 8 == 0){
               if(currentRow)
@@ -34,10 +36,12 @@ const pieceToText = {
           else
               currentColumn.classList.add("dark-cell");
           
-          if(board.array[i])
-              currentColumn.innerHTML = pieceToText[board.array[i].type];
-          currentColumn.setAttribute("id", i);
+          if(board.array[trueIndex])
+              currentColumn.innerHTML = pieceToText[board.array[trueIndex].type];
+          currentColumn.setAttribute("id", trueIndex);
           currentRow.appendChild(currentColumn);
+          
+          trueIndex += trueIndexModifier;
       }
       table.appendChild(currentRow);
       $("#board").append(table);
@@ -58,7 +62,7 @@ const pieceToText = {
       $(".highlight").removeClass("highlight");
   }
 
-  function getCurrentPlayer(){
+  function getThisPlayer(){
       return sessionStorage.getItem("player");
   }
 
@@ -72,24 +76,24 @@ const pieceToText = {
   function processClick(socket, index){
       if(selectedPiece === index)
           unselect();
-      else if(selectedPiece == null && board.array[index] && board.player == getCurrentPlayer() && board.player == board.array[index].player)
+      else if(selectedPiece == null && board.array[index] && board.player == getThisPlayer() && board.player == board.array[index].player)
           select(index);
-      else if(selectedPiece == null && board.array[index]?.player == changePlayer(getCurrentPlayer()))
+      else if(selectedPiece == null && board.array[index]?.player == changePlayer(getThisPlayer()))
           unselect();
-      else if(board.array[index]?.player == getCurrentPlayer() && board.player == getCurrentPlayer())
+      else if(board.array[index]?.player == getThisPlayer() && board.player == getThisPlayer())
           select(index);
       else if(selectedPiece != null){
-          if(!nextMoves[selectedPiece])
-              unselect();
           if(nextMoves[selectedPiece].includes(Number.parseInt(index))){
               socket.emit("makeMove", sessionStorage.getItem("gameId"), selectedPiece, index);
           }
+          else
+            unselect();
           selectedPiece = null;
       }
   }
 
-  function postMove(){
-      boardToHTML();
+  function postMove(Players){
+      boardToHTML(getThisPlayer() == Players.black);
       nextMoves = board.getNextMoves();
       if(board.isCheck(sessionStorage.getItem("player")))
           alert("You're in check");
