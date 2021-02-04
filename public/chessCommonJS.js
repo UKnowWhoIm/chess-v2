@@ -64,12 +64,12 @@ class Piece{
         this.multipleMoves = multipleMoves;
     }
 
-    getSpecialMoves(board, position){
+    getSpecialMoves(board, position, args){
         // Outputs absolute position
         return [];
     }
 
-    getAllMoves(board, position){
+    getAllMoves(board, position, splMoveArgs={"checkForCheck": true}){
         /**
          * Converts to coordinates(2d) and processes as checkOutOfBounds logic is in 2d
          * Otherwise will lead to confusing choices when -ve numbers come to play
@@ -107,7 +107,7 @@ class Piece{
                 if(!checkOutOfBounds(positionCoord, move) && board.array[getPosition(addCoordinates(move, positionCoord))]?.player == changePlayer(this.player))
                     moves.push(getPosition(addCoordinates(move, positionCoord)));
 
-        moves.push(...this.getSpecialMoves(board, position));
+        moves.push(...this.getSpecialMoves(board, position, splMoveArgs));
         return moves;
     }
 
@@ -136,7 +136,7 @@ class Pawn extends Piece{
         ];
     }
 
-    getSpecialMoves(board, position){
+    getSpecialMoves(board, position, args){
         let startingCol = {}, moves = [];
         startingCol[Players.white] = 6;
         startingCol[Players.black] = 1;
@@ -189,16 +189,16 @@ class King extends Piece{
         super(type, horizontalMoves.concat(diagonalMoves), null, false);
     }
 
-    getSpecialMoves(board, position){
+    getSpecialMoves(board, position, args){
         let moves = [];
         if(board.castleData[this.player]['k'])
-            if(board.array[position + 1] == null && board.array[position + 2] == null 
-                && !board.isCheck(this.player))
+            if(board.array[position + 1] == null && board.array[position + 2] == null)
+                if((args.checkForCheck && !board.isCheck(this.player)) || !args.checkForCheck)
                     moves.push(position + 2);
         
         if(board.castleData[this.player]['q'])
-            if(board.array[position - 1] == null && board.array[position - 2] == null  && board.array[position - 3] == null
-                && !board.isCheck(this.player))
+            if(board.array[position - 1] == null && board.array[position - 2] == null  && board.array[position - 3] == null)
+                if((args.checkForCheck && !board.isCheck(this.player)) || !args.checkForCheck)
                     moves.push(position - 2);
         
         return moves;
@@ -382,7 +382,7 @@ class Board{
         let piece, moves, move, board;
         let validMoves = {};
         let legalMoves = {};
-        pieces.forEach(piece => validMoves[piece] = this.array[piece].getAllMoves(this, piece));
+        pieces.forEach(piece => validMoves[piece] = this.array[piece].getAllMoves(this, piece, {"checkForCheck": checkForCheck}));
         if(checkForCheck)
             for(piece in validMoves){
                 moves = validMoves[piece];
