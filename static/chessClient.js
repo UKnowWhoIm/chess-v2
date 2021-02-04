@@ -84,6 +84,8 @@ const pieceToText = {
           select(index);
       else if(selectedPiece != null){
           if(nextMoves[selectedPiece].includes(Number.parseInt(index))){
+              // Make Move in client early
+              board.makeMove(selectedPiece, index);
               socket.emit("makeMove", sessionStorage.getItem("gameId"), selectedPiece, index);
           }
           else
