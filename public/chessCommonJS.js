@@ -354,7 +354,7 @@ class Board{
 
     promotePawn(piece){
         //if(this.pawnPromotion != null && Piece.getPlayer(piece) == this.player)
-        this.array[this.pawnPromotion] = piece;
+        this.array[this.pawnPromotion] = new PieceMap[piece.toLowerCase()](piece);
         this.pawnPromotion = null;
         this.player = changePlayer(this.player);
         this.fen = this.boardToFEN();

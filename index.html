@@ -116,6 +116,7 @@
         }
 
         function handleDraw(){
+            disableMoves = true;
             $("#player").text("The game has been drawn");
         }
 
@@ -173,6 +174,7 @@
         socket.on("errorPawnPromotion", () => alert("Invalid Move"));
 
         socket.on("victory", (player) => {
+            disableMoves = true;
             if(getThisPlayer() == player)
                 handleVictory();
             else
