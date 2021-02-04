@@ -219,7 +219,7 @@
 
         $("#board").delegate("td", "click", function(){
             if(!disableMoves)
-                processClick(socket, this.id);
+                processClick(socket, this.id, Players);
         });
 
         $("#pawn-promotion").delegate(".pawn-promotion-piece", "click", function(){

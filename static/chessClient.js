@@ -73,7 +73,7 @@ const pieceToText = {
       highlightMoves(index);
   }
   
-  function processClick(socket, index){
+  function processClick(socket, index, Players){
       if(selectedPiece === index)
           unselect();
       else if(selectedPiece == null && board.array[index] && board.player == getThisPlayer() && board.player == board.array[index].player)
@@ -86,6 +86,7 @@ const pieceToText = {
           if(nextMoves[selectedPiece].includes(Number.parseInt(index))){
               // Make Move in client early
               board.makeMove(selectedPiece, index);
+              postMove(Players);
               socket.emit("makeMove", sessionStorage.getItem("gameId"), selectedPiece, index);
           }
           else
