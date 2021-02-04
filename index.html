@@ -70,6 +70,7 @@
         </p>
     </div>
     <script>
+        let disableMoves = false;
         let socket = io();
 
         function setPlayer(){
@@ -93,9 +94,11 @@
             pieces[getThisPlayer()].forEach(piece => {
                 let element = document.createElement("div");
                 element.classList.add("pawn-promotion-piece");
+                element.setAttribute("id", piece);
                 element.innerHTML = pieceToText[piece];
                 document.getElementById("pawn-promotion").appendChild(element);
             });
+            disableMoves = true;
         }
 
         function setBoardState(fen){
@@ -157,13 +160,14 @@
                 pawnPromotionSetup();
 
             if(player == Players.white)
-                $("#move").text("White can promote pawn");
+                $("#player").text("White can promote pawn");
             else
-                $("#move").text("Black can promote pawn");
+                $("#player").text("Black can promote pawn");
         });
 
         socket.on("successPawnPromotion", ()=>{
             $("#pawn-promotion").addClass("deactive");
+            disableMoves = false;
         });
 
         socket.on("errorPawnPromotion", () => alert("Invalid Move"));
@@ -178,7 +182,12 @@
         socket.on("draw", () => handleDraw());
 
         $("#board").delegate("td", "click", function(){
-            processClick(socket, this.id);
+            if(!disableMoves)
+                processClick(socket, this.id);
+        });
+
+        $("#pawn-promotion").delegate(".pawn-promotion-piece", "click", function(){
+            socket.emit("promotePawn", sessionStorage.getItem("gameId"), this.id);
         });
        
         function createRoom(){

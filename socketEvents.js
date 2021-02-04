@@ -16,7 +16,7 @@ async function assignRoom(roomId, clients){
         black = clients[1];
     }
     
-    await db.updateGameRoom(roomId, null, white, black, true);
+    await db.updateGameRoom(roomId, undefined, white, black, true);
     return {"white": white, "black": black};
 }
 
@@ -76,8 +76,7 @@ function eventHandler(io, socket){
         from = Number.parseInt(from);
         to = Number.parseInt(to);
         let room = await db.readGameRoom(gameId);
-        console.log(room.pawnPromotionData);
-        if(room.pawnPromotionData != null){
+        if(room.pawnPromotionData !== null){
             socket.emit("errorPawnPromotion");
             return;
         }
@@ -88,7 +87,7 @@ function eventHandler(io, socket){
             if(nexMoves.hasOwnProperty(from) && nexMoves[from].includes(to)){
                 boardObj.makeMove(from, to);
                 if(boardObj.pawnPromotion != null)
-                    db.updateGameRoom(gameId, boardObj.fen, null, null, null, {"player": boardObj.player, "cell": boardObj.pawnPromotion});
+                    db.updateGameRoom(gameId, boardObj.fen, undefined, undefined, undefined, {"player": boardObj.player, "cell": boardObj.pawnPromotion});
                 else
                     db.updateGameRoom(gameId, boardObj.fen);
                 
@@ -109,7 +108,6 @@ function eventHandler(io, socket){
                     io.to(gameId).emit("victory", winner);
                     gameOver = true;
                 }
-                console.log(gameOver, boardObj.pawnPromotion);
                 if(!gameOver && boardObj.pawnPromotion != null)
                     io.to(gameId).emit("startPawnPromotion", boardObj.player);
                 
@@ -122,17 +120,17 @@ function eventHandler(io, socket){
         socket.emit("invalidMove");
     });
 
-    socket.on("promotePawn", async function(id, piece){
-        let room = await db.readGameRoom(id);
-        let board = new Board(room.board);
-        if(Object.keys(room.promotionData).length !== 0){
-            if(room.white == socket.id && room.promotionData.player == Players.white || room.black == socket.id && room.promotionData.player == Players.black)
-                if(room.promotionData.player == Piece.getPlayer(piece)){
-                    board.pawnPromotion = room.promotionData.cell;
-                    board.promotePawn(piece);
-                    db.updateGameRoom(id, board.fen, null, null, null, "");
+    socket.on("promotePawn", async function(gameId, piece){
+        let room = await db.readGameRoom(gameId);
+        let boardObj = new chess.Board(room.board);
+        if(Object.keys(room.pawnPromotionData).length !== 0){
+            if(room.white == socket.id && room.pawnPromotionData.player == chess.Players.white || room.black == socket.id && room.pawnPromotionData.player == chess.Players.black)
+                if(room.pawnPromotionData.player == chess.Piece.getPlayer(piece)){
+                    boardObj.pawnPromotion = room.pawnPromotionData.cell;
+                    boardObj.promotePawn(piece);
+                    db.updateGameRoom(gameId, boardObj.fen, undefined, undefined, undefined, null);
                     io.to(gameId).emit("boardUpdated", boardObj.fen);
-                    socket.emit("succeessPawnPromotion");
+                    socket.emit("successPawnPromotion");
                     return;
                 }
         }

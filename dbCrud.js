@@ -31,18 +31,16 @@ async function readGameRoom(id){
 async function updateGameRoom(id, board, white, black, started, promotionData){
     let dbObj = await getDBObject();
     let updateData = {};
-
-    if(board)
+    if(board !== undefined)
         updateData["board"] = board;
-    if(white)
+    if(white !== undefined)
         updateData["white"] = white;
-    if(black)
+    if(black !== undefined)
         updateData["black"] = black;
-    if(started)
+    if(started !== undefined)
         updateData["started"] = started;
-    if(promotionData)
+    if(promotionData !== undefined)
         updateData["pawnPromotionData"] = promotionData;
-        
     await dbObj.db.collection(clGameRooms).updateOne({"_id": ObjectID(id)}, {$set: updateData}, { "upsert": true });
     dbObj.conn.close();
 }

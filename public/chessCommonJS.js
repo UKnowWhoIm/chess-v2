@@ -353,8 +353,8 @@ class Board{
     }
 
     promotePawn(piece){
-        if(this.pawnPromotion != null && Piece.getPlayer(piece) == this.player)
-            board.array[this.pawnPromotion] = piece;
+        //if(this.pawnPromotion != null && Piece.getPlayer(piece) == this.player)
+        this.array[this.pawnPromotion] = piece;
         this.pawnPromotion = null;
         this.player = changePlayer(this.player);
         this.fen = this.boardToFEN();

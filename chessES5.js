@@ -232,8 +232,6 @@ class Board{
         // FEN: rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1
         let raw = fen.split(" ");
         this.array = this.getFENPieces(raw[0]);
-        this._blackPieces = [];
-        this._whitePieces = [];
         this.player = Players[raw[1]];
         this.castleData = this.getCastleData(raw[2]);
         this.enPassantSquare = this.getEnPassantData(raw[3])
@@ -317,7 +315,6 @@ class Board{
             else
                 this.enPassantSquare = null;
             if(this.player == Players.white && Math.floor(to / 8)  == 0 || this.player == Players.black && Math.floor(to / 8) == 7){
-                console.log("PP", from, to);
                 this.pawnPromotion = to;
             }
         }
@@ -354,10 +351,11 @@ class Board{
     }
 
     promotePawn(piece){
-        if(this.pawnPromotion != null && Piece.getPlayer(piece) == this.player)
-            board.array[this.pawnPromotion] = piece;
+        //if(this.pawnPromotion != null && Piece.getPlayer(piece) == this.player)
+        this.array[this.pawnPromotion] = new PieceMap[piece.toLowerCase()](piece);
         this.pawnPromotion = null;
         this.player = changePlayer(this.player);
+        this.fen = this.boardToFEN();
     }
 
     isCheck(player=this.player){
