@@ -197,9 +197,9 @@ class King extends Piece{
                     moves.push(position + 2);
         
         if(board.castleData[this.player]['q'])
-            if(board.array[position - 1] == null && board.array[position - 2] == null  && board.array[position - 3]
+            if(board.array[position - 1] == null && board.array[position - 2] == null  && board.array[position - 3] == null
                 && !board.isCheck(this.player))
-                    moves.push(pos - 2);
+                    moves.push(position - 2);
         
         return moves;
     }
@@ -299,13 +299,13 @@ class Board{
         if(piece.type.toLowerCase() == "k"){
             if(from - to == 2){
                 // Queen
-                board.array[from - 1] = board.array[from - 4];
-                board.array[from - 4] = null;
+                this.array[from - 1] = this.array[from - 4];
+                this.array[from - 4] = null;
             }
             else if(from - to == -2){
                 // King
-                board.array[from + 1] = board.array[from + 3];
-                board.array[from + 3] = null;
+                this.array[from + 1] = this.array[from + 3];
+                this.array[from + 3] = null;
             }
         }
 
