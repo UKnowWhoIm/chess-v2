@@ -11,6 +11,7 @@
     <style>
         body{
             text-align: center;
+            background-color: #133337;
         }
         table{
             margin: auto;
@@ -18,12 +19,26 @@
         .highlight{
             background-color: coral!important;
         }
+        button{
+            margin-top: 100px;
+            font-size: large;
+            cursor: pointer;
+            color: white;
+            background-color: #008F11;
+            padding: 20px;
+            text-align: center;
+            border: none;
+        }
         td{
             height: 60px;
             width: 60px;
             text-align: center;
             font-size: 48px;
             cursor: pointer;
+        }
+        input[type=text]{
+            padding: 10px;
+            font-size: large;
         }
         .light-cell{
             background-color: lightblue;
@@ -35,13 +50,13 @@
             background-color:orange;
         }
         h2{
+            color: white;
             font-size: 48px;
             text-align: center;
             font-family: 'Courier New', Courier, monospace;
-            color: black;
         }
         .deactive{
-            display: none;
+            display: none!important;
         }
         .pawn-promotion-piece{
             display: inline;
@@ -50,24 +65,33 @@
             padding: 10px;
             text-align: center;
         }
+        #waiting{
+            color: white;
+        }
     </style>
     <title></title>
   </head>
   <body>
-    <h2 id="player"></h2>
-    <div id="board"></div>
+    <div id="board-ui">
+        <h2 id="player"></h2>
+        <div id="board"></div>
+    </div>
     <div id="pawn-promotion" class="deactive"></div>
     <div id="welcome" class="deactive">
         <h2>Chess</h2>
         <button onclick="createRoom()">Create Game</button><br/><br/>
-        <input type="text" placeholder="Game ID" name="gameId"/>
+        <button onclick="setJoinUI()">Join A Game</button>
+    </div>
+    <div id="join" class="deactive">
+        <input type="text" placeholder="Game ID" name="gameId"/><br/>
         <button onclick="joinRoom($('input[name=gameId]').val())">Join Game</button>
     </div>
     <div id="waiting" class="deactive">
         <h2>Waiting for a player</h2>
         <p>
             The Room Id is: <span id="roomId"></span>
-        </p>
+        </p><br/>
+        <button onclick="window.location.reload()">Leave Room</button>
     </div>
     <script>
         let disableMoves = false;
@@ -84,6 +108,7 @@
         function prepForGame(){
             $("#welcome").addClass("deactive");
             $("#waiting").addClass("deactive");
+            $("#board-ui").removeClass("deactive");
         }
 
         function pawnPromotionSetup(){
@@ -187,6 +212,7 @@
 
         socket.on("endGameDisconnect", function(){
             alert("Other player has disconnected, ending game");
+            setWaitingRoom();
         });
 
         socket.on("draw", () => handleDraw());
@@ -209,8 +235,16 @@
             socket.emit("roomJoin", id);
         }
 
-        function setWaitingRoom(){
+        function setJoinUI(){
             $("#welcome").addClass("deactive");
+            $("#join").removeClass("deactive");
+            $("title").html("Enter a valid Game Id");
+        }
+
+        function setWaitingRoom(){
+            $("#board-ui").addClass("deactive");
+            $("#welcome").addClass("deactive");
+            $("#join").addClass("deactive");
             $("#waiting").removeClass("deactive");
             $("title").html("Waiting for a room");
         }
