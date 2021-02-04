@@ -146,7 +146,8 @@ function eventHandler(io, socket){
                 self.to(room).emit("endGameDisconnect");
                 db.deleteGameRoom(room);
             }
-            else if(roomDB && io.sockets.adapter.rooms.get(room).size == 0)
+            // sockets.io will automatically delete room if empty
+            else if(roomDB && io.sockets.adapter.rooms.get(String(room)) === undefined)
                 db.deleteGameRoom(room);
         });
     });
