@@ -323,7 +323,7 @@ class Board{
 
         // Castle
         if(piece.type.toLowerCase() == "k")
-            this.castleData[this.player] == {"k": false, "q":false};
+            this.castleData[this.player] = {"k": false, "q":false};
         
         if(piece.type.toLowerCase() == "r")
             if(from % 8 == 0)
