@@ -23,7 +23,7 @@ async function createGameRoom(){
 
 async function readGameRoom(id){
     let dbObj = await getDBObject();
-    let obj = await dbObj.db.collection(clGameRooms).findOne(ObjectID(id));
+    let obj = await dbObj.db.collection(clGameRooms).findOne({"_id": ObjectID(id)});
     dbObj.conn.close();
     return obj;
 }

@@ -1,5 +1,6 @@
 const db = require("./dbCrud");
 const chess = require("./chessES5");
+const { ObjectID } = require("mongodb");
 
 async function assignRoom(roomId, clients){
     // Assign clients colors randomly and start game
@@ -62,14 +63,6 @@ function eventHandler(io, socket){
         }
         else
             socket.emit("invalidRoomId");
-    });
-
-    socket.on("reJoin", async function(roomId){
-        if(io.sockets.adapter.rooms.has(String(roomId))){
-            let room = await db.readGameRoom(roomId);
-            if(room.white == socket.id || room.black == socket.id)
-                socket.emit("reJoinSuccess", room.board);
-        }
     });
 
     socket.on("makeMove", async function(gameId, from, to){
@@ -139,15 +132,21 @@ function eventHandler(io, socket){
 
     socket.on('disconnecting', function(){
         var self = this;
-        var rooms = Object.keys(self.rooms);
-
+        var rooms = self.rooms;
         rooms.forEach(async function(room){
             self.to(room).emit('playerDisconnect');
-            if((await db.readGameRoom(room)).started){
+            let roomDB;
+            try{
+                roomDB = await db.readGameRoom(room);
+            }
+            catch{
+                roomDB = null;
+            }
+            if(roomDB && roomDB.started){
                 self.to(room).emit("endGameDisconnect");
                 db.deleteGameRoom(room);
             }
-            else if(io.adapter.sockets.rooms.get(room).size == 0)
+            else if(roomDB && io.sockets.adapter.rooms.get(room).size == 0)
                 db.deleteGameRoom(room);
         });
     });

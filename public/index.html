@@ -181,6 +181,14 @@
                 handleLoss();
         });
 
+        socket.on("playerDisconnect", function(){
+            alert("A player has disconnected")
+        });
+
+        socket.on("endGameDisconnect", function(){
+            alert("Other player has disconnected, ending game");
+        });
+
         socket.on("draw", () => handleDraw());
 
         $("#board").delegate("td", "click", function(){
@@ -208,10 +216,6 @@
         }
 
         $(document).ready(function(){
-            let roomId = sessionStorage.getItem("gameId");
-            if(roomId)
-                socket.emit("reJoin", roomId);
-            
             $("#welcome").removeClass("deactive");
             $("title").html("Start a game | Join a game");
         })
