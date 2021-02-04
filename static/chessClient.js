@@ -86,7 +86,7 @@ const pieceToText = {
           if(nextMoves[selectedPiece].includes(Number.parseInt(index))){
               // Make Move in client early
               board.makeMove(selectedPiece, index);
-              postMove(Players);
+              postMove(Players, true);
               socket.emit("makeMove", sessionStorage.getItem("gameId"), selectedPiece, index);
           }
           else
@@ -95,9 +95,11 @@ const pieceToText = {
       }
   }
 
-  function postMove(Players){
+  function postMove(Players, early=false){
       boardToHTML(getThisPlayer() == Players.black);
-      nextMoves = board.getNextMoves();
-      if(board.isCheck(sessionStorage.getItem("player")))
-          alert("You're in check");
+      if(!early){
+        nextMoves = board.getNextMoves();
+        if(board.isCheck(sessionStorage.getItem("player")))
+            alert("You're in check");
+      }
   }
