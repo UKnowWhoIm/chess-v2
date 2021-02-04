@@ -14,7 +14,7 @@ async function getDBObject(){
 }
 
 async function createGameRoom(){
-    room = {"white": "", "black": "", "board": initialFen, "started": false};
+    room = {"white": "", "black": "", "board": initialFen, "started": false, "pawnPromotionData": null};
     let dbObj = await getDBObject();
     let obj = await dbObj.db.collection(clGameRooms).insertOne(room);
     dbObj.conn.close();
@@ -28,7 +28,7 @@ async function readGameRoom(id){
     return obj;
 }
 
-async function updateGameRoom(id, board, white, black, started){
+async function updateGameRoom(id, board, white, black, started, promotionData){
     let dbObj = await getDBObject();
     let updateData = {};
 
@@ -40,6 +40,8 @@ async function updateGameRoom(id, board, white, black, started){
         updateData["black"] = black;
     if(started)
         updateData["started"] = started;
+    if(promotionData)
+        updateData["pawnPromotionData"] = promotionData;
         
     await dbObj.db.collection(clGameRooms).updateOne({"_id": ObjectID(id)}, {$set: updateData}, { "upsert": true });
     dbObj.conn.close();

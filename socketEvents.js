@@ -76,14 +76,23 @@ function eventHandler(io, socket){
         from = Number.parseInt(from);
         to = Number.parseInt(to);
         let room = await db.readGameRoom(gameId);
+        console.log(room.pawnPromotionData);
+        if(room.pawnPromotionData != null){
+            socket.emit("errorPawnPromotion");
+            return;
+        }
+
         if(checkPlayer(room, socket.id, from)){
             let boardObj = new chess.Board(room.board);
             let nexMoves = boardObj.getNextMoves();
             if(nexMoves.hasOwnProperty(from) && nexMoves[from].includes(to)){
                 boardObj.makeMove(from, to);
-                db.updateGameRoom(gameId, boardObj.fen);
+                if(boardObj.pawnPromotion != null)
+                    db.updateGameRoom(gameId, boardObj.fen, null, null, null, {"player": boardObj.player, "cell": boardObj.pawnPromotion});
+                else
+                    db.updateGameRoom(gameId, boardObj.fen);
                 
-                let winner, gameOver;
+                let winner, gameOver=false;
                 
                 if(boardObj.checkVictory(chess.Players.white))
                     winner = chess.Players.white;
@@ -100,6 +109,10 @@ function eventHandler(io, socket){
                     io.to(gameId).emit("victory", winner);
                     gameOver = true;
                 }
+                console.log(gameOver, boardObj.pawnPromotion);
+                if(!gameOver && boardObj.pawnPromotion != null)
+                    io.to(gameId).emit("startPawnPromotion", boardObj.player);
+                
                 // As game is Over
                 if(gameOver) 
                     db.deleteGameRoom(gameId);
@@ -107,6 +120,23 @@ function eventHandler(io, socket){
             }
         }
         socket.emit("invalidMove");
+    });
+
+    socket.on("promotePawn", async function(id, piece){
+        let room = await db.readGameRoom(id);
+        let board = new Board(room.board);
+        if(Object.keys(room.promotionData).length !== 0){
+            if(room.white == socket.id && room.promotionData.player == Players.white || room.black == socket.id && room.promotionData.player == Players.black)
+                if(room.promotionData.player == Piece.getPlayer(piece)){
+                    board.pawnPromotion = room.promotionData.cell;
+                    board.promotePawn(piece);
+                    db.updateGameRoom(id, board.fen, null, null, null, "");
+                    io.to(gameId).emit("boardUpdated", boardObj.fen);
+                    socket.emit("succeessPawnPromotion");
+                    return;
+                }
+        }
+        socket.emit("errorPawnPromotion");
     });
 
     socket.on('disconnecting', function(){

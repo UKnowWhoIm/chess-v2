@@ -43,14 +43,20 @@
         .deactive{
             display: none;
         }
+        .pawn-promotion-piece{
+            display: inline;
+            font-size: 48px;
+            cursor: pointer;
+            padding: 10px;
+            text-align: center;
+        }
     </style>
     <title></title>
   </head>
   <body>
     <h2 id="player"></h2>
-    <div id="board">
-
-    </div>
+    <div id="board"></div>
+    <div id="pawn-promotion" class="deactive"></div>
     <div id="welcome" class="deactive">
         <h2>Chess</h2>
         <button onclick="createRoom()">Create Game</button><br/><br/>
@@ -77,6 +83,19 @@
         function prepForGame(){
             $("#welcome").addClass("deactive");
             $("#waiting").addClass("deactive");
+        }
+
+        function pawnPromotionSetup(){
+            $("#pawn-promotion").removeClass("deactive");
+            let pieces = {};
+            pieces[Players.white] = ['N', 'B', 'R', 'Q'];
+            pieces[Players.black] = ['n', 'b', 'r', 'q'];
+            pieces[getThisPlayer()].forEach(piece => {
+                let element = document.createElement("div");
+                element.classList.add("pawn-promotion-piece");
+                element.innerHTML = pieceToText[piece];
+                document.getElementById("pawn-promotion").appendChild(element);
+            });
         }
 
         function setBoardState(fen){
@@ -111,7 +130,7 @@
 
         socket.on("boardUpdated", (fen) => {
             setBoardState(fen);
-            if(board.player == sessionStorage.getItem("player"))
+            if(board.player == getThisPlayer())
                 alert("Your Turn");
         });
 
@@ -132,6 +151,22 @@
         socket.on("invalidRoomId", () => {
             alert("Invalid Room Id");
         });
+
+        socket.on("startPawnPromotion", (player) => {
+            if(player == getThisPlayer())
+                pawnPromotionSetup();
+
+            if(player == Players.white)
+                $("#move").text("White can promote pawn");
+            else
+                $("#move").text("Black can promote pawn");
+        });
+
+        socket.on("successPawnPromotion", ()=>{
+            $("#pawn-promotion").addClass("deactive");
+        });
+
+        socket.on("errorPawnPromotion", () => alert("Invalid Move"));
 
         socket.on("victory", (player) => {
             if(getThisPlayer() == player)

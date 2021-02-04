@@ -224,6 +224,7 @@ class Board{
         this.halfMoves =  0;
         this.fullMoves = 0;
         this.fen = fenRepresentation;
+        this.pawnPromotion = null;
         this.fenToBoard(fenRepresentation);
     }
     
@@ -309,12 +310,17 @@ class Board{
         }
 
         // Update board state
-        // En Passant
-        if(piece.type.toLowerCase() == "p")
+        // En Passant & Pawn Promotion
+        if(piece.type.toLowerCase() == "p"){
             if(Math.abs(from - to) == 16)
                 this.enPassantSquare = Number.parseInt(to) + playerMultiplier(changePlayer(this.player)) * 8;
             else
                 this.enPassantSquare = null;
+            if(this.player == Players.white && Math.floor(to / 8)  == 0 || this.player == Players.black && Math.floor(to / 8) == 7){
+                console.log("PP", from, to);
+                this.pawnPromotion = to;
+            }
+        }
         else
             this.enPassantSquare = null;
 
@@ -339,11 +345,19 @@ class Board{
             this.fullMoves += 1;
         
         // Player change
-        this.player = changePlayer(this.player)
+        if(this.pawnPromotion == null)
+            this.player = changePlayer(this.player);
 
         this.array[to] = this.array[from]
         this.array[from] = null;
         this.fen = this.boardToFEN();
+    }
+
+    promotePawn(piece){
+        if(this.pawnPromotion != null && Piece.getPlayer(piece) == this.player)
+            board.array[this.pawnPromotion] = piece;
+        this.pawnPromotion = null;
+        this.player = changePlayer(this.player);
     }
 
     isCheck(player=this.player){
@@ -479,3 +493,4 @@ class Board{
 
 exports.Board = Board;
 exports.Players = Players;
+exports.Piece = Piece;
