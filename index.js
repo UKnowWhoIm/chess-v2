@@ -4,7 +4,10 @@ var path = require("path");
 var app = express();
 var server = http.createServer(app);
 const io = require('socket.io')(server);
-server.listen(3000);
+const dotenv = require('dotenv');
+dotenv.config({path: __dirname + "/dev.env"});
+
+server.listen(process.env.PORT);
  
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
