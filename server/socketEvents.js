@@ -1,6 +1,7 @@
 const db = require("./dbCrud");
-const chess = require("./chessES5");
-const { ObjectID } = require("mongodb");
+const Players = require("./chess/Utils").Players;
+const chessPiece = require("./chess/Piece").Piece;
+const chessBoard = require("./chess/Board").Board;
 
 async function assignRoom(roomId, clients){
     // Assign clients colors randomly and start game
@@ -22,11 +23,11 @@ async function assignRoom(roomId, clients){
 }
 
 function checkPlayer(gameData, clientId, from){
-    let board = new chess.Board(gameData.board);
+    let board = new chessBoard(gameData.board);
     if(board.array[from])
-        if(board.array[from].player == chess.Players.white && gameData.white == clientId)
+        if(board.array[from].player == Players.white && gameData.white == clientId)
             return true;
-        if(board.array[from].player == chess.Players.black && gameData.black == clientId)
+        if(board.array[from].player == Players.black && gameData.black == clientId)
             return true;
 
     return false;
@@ -53,8 +54,8 @@ function eventHandler(io, socket){
                 if(io.sockets.adapter.rooms.get(String(roomId)).size == 2){
                     assignRoom(roomId, io.sockets.adapter.rooms.get(String(roomId))).then(
                         playerData => {
-                            io.to(playerData.white).emit("playerColor", chess.Players.white);
-                            io.to(playerData.black).emit("playerColor", chess.Players.black);
+                            io.to(playerData.white).emit("playerColor", Players.white);
+                            io.to(playerData.black).emit("playerColor", Players.black);
                             io.to(roomId).emit("startGame", db.initialFen);
                         }
                     );
@@ -75,7 +76,7 @@ function eventHandler(io, socket){
         }
 
         if(checkPlayer(room, socket.id, from)){
-            let boardObj = new chess.Board(room.board);
+            let boardObj = new chessBoard(room.board);
             let nexMoves = boardObj.getNextMoves();
             if(nexMoves.hasOwnProperty(from) && nexMoves[from].includes(to)){
                 boardObj.makeMove(from, to);
@@ -86,10 +87,10 @@ function eventHandler(io, socket){
                 
                 let winner, gameOver=false;
                 
-                if(boardObj.checkVictory(chess.Players.white))
-                    winner = chess.Players.white;
-                else if(boardObj.checkVictory(chess.Players.black))
-                    winner = chess.Players.black;
+                if(boardObj.checkVictory(Players.white))
+                    winner = Players.white;
+                else if(boardObj.checkVictory(Players.black))
+                    winner = Players.black;
 
                 io.to(gameId).emit("boardUpdated", boardObj.fen);
                 
@@ -115,10 +116,10 @@ function eventHandler(io, socket){
 
     socket.on("promotePawn", async function(gameId, piece){
         let room = await db.readGameRoom(gameId);
-        let boardObj = new chess.Board(room.board);
+        let boardObj = new chessBoard(room.board);
         if(Object.keys(room.pawnPromotionData).length !== 0){
-            if(room.white == socket.id && room.pawnPromotionData.player == chess.Players.white || room.black == socket.id && room.pawnPromotionData.player == chess.Players.black)
-                if(room.pawnPromotionData.player == chess.Piece.getPlayer(piece)){
+            if(room.white == socket.id && room.pawnPromotionData.player == Players.white || room.black == socket.id && room.pawnPromotionData.player == Players.black)
+                if(room.pawnPromotionData.player == chessPiece.getPlayer(piece)){
                     boardObj.pawnPromotion = room.pawnPromotionData.cell;
                     boardObj.promotePawn(piece);
                     db.updateGameRoom(gameId, boardObj.fen, undefined, undefined, undefined, null);
