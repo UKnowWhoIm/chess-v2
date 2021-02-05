@@ -3,7 +3,7 @@
 This is a browser based multiplayer chess engine written in Node.
 
 ## Table Of Contents
-- [How does it work](#how-does-it-work?)?
+- [How does it work](#how-does-it-work)?
     - [Basic Workflow](#basic-workflow)
 - [Chess Logic](#chess-logic)
     - [Storing Board State](#storing-the-board-state)
