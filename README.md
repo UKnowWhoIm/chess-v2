@@ -39,9 +39,9 @@ The chess logic run by the server is stored in /server/chess/. The client side d
 
 ### The Piece Classes
 
-All the pieces extend the Base Class "Piece".
+All the pieces extend the Base Class `Piece`.
 
-The Piece Class
+The `Piece` Class
 
 | Member | Overriden | Usage |
 | --- | --- | --- |
