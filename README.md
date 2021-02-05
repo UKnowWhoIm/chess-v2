@@ -94,9 +94,6 @@ This function makes the actual changes to the `array` property. It also changes 
 2. The game is drawn(checkDraw function)
     - Stalemate: The enemy has no legal moves but isn't in check.(checkStalemate function)
     - 50 move rule: Game is automatically drawn after 50 consecutive halfmoves.
-    - Insufficent Material: TODO
-    - Mutual Agreement: TODO
-3. A Player has resigned: TODO
 
 ### Move Validation
 
