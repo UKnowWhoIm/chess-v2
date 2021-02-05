@@ -50,21 +50,27 @@ function eventHandler(io, socket){
             else{
                 socket.join(roomId);
                 socket.emit("getGameId", roomId);
-                io.to(roomId).emit("joinedRoom");
-                if(io.sockets.adapter.rooms.get(String(roomId)).size == 2){
-                    assignRoom(roomId, io.sockets.adapter.rooms.get(String(roomId))).then(
-                        playerData => {
-                            io.to(playerData.white).emit("playerColor", Players.white);
-                            io.to(playerData.black).emit("playerColor", Players.black);
-                            io.to(roomId).emit("startGame", db.initialFen);
-                        }
-                    );
-                }
+                if(io.sockets.adapter.rooms.get(String(roomId)).size == 2)
+                    io.to(roomId).emit("startCountDown");
             }
         }
         else
             socket.emit("invalidRoomId");
     });
+
+    socket.on("coutdownFinished", function(roomId){
+        if(io.sockets.adapter.rooms.get(String(roomId)).size == 2){
+            assignRoom(roomId, io.sockets.adapter.rooms.get(String(roomId))).then(
+                playerData => {
+                    io.to(playerData.white).emit("playerColor", Players.white);
+                    io.to(playerData.black).emit("playerColor", Players.black);
+                    io.to(roomId).emit("startGame", db.initialFen);
+                }
+            );
+        }
+        else
+            io.to(roomId).emit("endCountDownDisconnect");
+    }); 
 
     socket.on("makeMove", async function(gameId, from, to){
         from = Number.parseInt(from);
@@ -150,6 +156,8 @@ function eventHandler(io, socket){
             // sockets.io will automatically delete room if empty
             else if(roomDB && io.sockets.adapter.rooms.get(String(room)) === undefined)
                 db.deleteGameRoom(room);
+            else if(roomDB)
+                self.to(room).emit("endCountDownDisconnect");
         });
     });
 }

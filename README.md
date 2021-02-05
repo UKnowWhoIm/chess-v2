@@ -131,7 +131,9 @@ All client side socket handling is located in [index.html](/public/index.html)
 | `roomCreate` | Client | null | Indicate to the server a new room has been created. |
 | `roomJoin` | Client | null | Indicate to the server a new player has joined the room. |
 | `getGameId` | Server | gameId | Emit the game Id to the client. |
-| `joinedRoom` | Server | null | Emit to the room that a new player has joined. |
+| `startCountDown` | Server | null | Emit to the room to start the countdown. |
+| `coutdownFinished` | Client | gameId | Emit to the server that coutdown has finished. |
+| `endCountDownDisconnect` | Server | null | Emit to the room that countdown must be stopped due to a disconnecting player |
 | `startGame` | Server | initialBoard | Emit to the room to start the game. |
 | `playerColor` | Server | color | Emit the color of the client to the client. |
 | `invalidRoomId` | Server | null | Emit that the room id is invalid to the client. |

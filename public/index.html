@@ -99,7 +99,7 @@
     <div id="snackbar"></div>
     <script>
         let disableMoves = false;
-
+        let countDown;
         function setPlayer(){
             $("h2").css("display", "block");
             if(Players.white == board.player)
@@ -208,6 +208,7 @@
 
         socket.on("playerColor", (player) => {
             sessionStorage.setItem("player", player);
+            console.log(player);
             if(player == Players.white)
                 showSnackBar("You\'re playing as white");
             else
@@ -256,6 +257,16 @@
         socket.on("endGameDisconnect", function(){
             alert("Other player has disconnected, ending game");
             setWaitingRoom();
+        });
+
+        socket.on("startCountDown", function(){
+            showSnackBar("Game will begin shortly");
+            countDown = setTimeout(() => socket.emit("coutdownFinished", sessionStorage.getItem("gameId")), 5000);
+        });
+
+        socket.on("endCountDownDisconnect", function(){
+            showSnackBar("The countdown has stopped");
+            clearTimeout(countDown);
         });
 
         socket.on("draw", () => handleDraw());
