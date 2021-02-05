@@ -95,7 +95,6 @@
     </div>
     <script>
         let disableMoves = false;
-        let socket = io();
 
         function setPlayer(){
             $("h2").css("display", "block");
@@ -144,6 +143,46 @@
             disableMoves = true;
             $("#player").text("The game has been drawn");
         }
+
+        $("#board").delegate("td", "click", function(){
+            if(!disableMoves)
+                processClick(socket, this.id, Players);
+        });
+
+        $("#pawn-promotion").delegate(".pawn-promotion-piece", "click", function(){
+            socket.emit("promotePawn", sessionStorage.getItem("gameId"), this.id);
+        });
+       
+        function createRoom(){
+            socket.emit("roomCreate");
+        }
+
+        function joinRoom(id){
+            console.log(id);
+            socket.emit("roomJoin", id);
+        }
+
+        function setJoinUI(){
+            $("#welcome").addClass("deactive");
+            $("#join").removeClass("deactive");
+            $("title").html("Enter a valid Game Id");
+        }
+
+        function setWaitingRoom(){
+            $("#board-ui").addClass("deactive");
+            $("#welcome").addClass("deactive");
+            $("#join").addClass("deactive");
+            $("#waiting").removeClass("deactive");
+            $("title").html("Waiting for a room");
+        }
+
+        $(document).ready(function(){
+            $("#welcome").removeClass("deactive");
+            $("title").html("Start a game | Join a game");
+        });
+
+        // Socket Event Handlers
+        let socket = io();
 
         socket.on("getGameId", function(gameId){
             sessionStorage.setItem("gameId", gameId);
@@ -216,43 +255,6 @@
         });
 
         socket.on("draw", () => handleDraw());
-
-        $("#board").delegate("td", "click", function(){
-            if(!disableMoves)
-                processClick(socket, this.id, Players);
-        });
-
-        $("#pawn-promotion").delegate(".pawn-promotion-piece", "click", function(){
-            socket.emit("promotePawn", sessionStorage.getItem("gameId"), this.id);
-        });
-       
-        function createRoom(){
-            socket.emit("roomCreate");
-        }
-
-        function joinRoom(id){
-            console.log(id);
-            socket.emit("roomJoin", id);
-        }
-
-        function setJoinUI(){
-            $("#welcome").addClass("deactive");
-            $("#join").removeClass("deactive");
-            $("title").html("Enter a valid Game Id");
-        }
-
-        function setWaitingRoom(){
-            $("#board-ui").addClass("deactive");
-            $("#welcome").addClass("deactive");
-            $("#join").addClass("deactive");
-            $("#waiting").removeClass("deactive");
-            $("title").html("Waiting for a room");
-        }
-
-        $(document).ready(function(){
-            $("#welcome").removeClass("deactive");
-            $("title").html("Start a game | Join a game");
-        })
       </script>
   </body>
 </html>
