@@ -143,5 +143,6 @@ All client side socket handling is located in [index.html](/public/index.html)
 | `startPawnPromotion` | Server | player | Emit to the room that `player` can promote a pawn. |
 | `successPawnPromotion` | Server | null | Emit to the client that Pawn Promotion is successfull.|
 | `errorPawnPromotion` | Server | null | Emit to the client that Pawn Promotion Failed. |
+| `promotePawn` | Client | gameId, piece | Emit to the server that the client requests to promote the pawn to `piece` |
 | `playerDisconnect` | Server | null | Emit to the room that a player has disconnected. |
 | `endGameDisconnect` | Server | null | Emit to the room that the current game has ended due to a player being disconnected. |
