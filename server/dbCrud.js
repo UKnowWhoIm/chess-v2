@@ -1,7 +1,7 @@
 const MongoClient = require('mongodb').MongoClient;
 const ObjectID = require("mongodb").ObjectID;
 const dotenv = require('dotenv');
-dotenv.config({path: __dirname + "/dev.env"});
+dotenv.config();
 
 const url = process.env.DB_URL;
 const db = process.env.DB_NAME;

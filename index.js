@@ -1,11 +1,11 @@
 var express = require('express'), http = require('http');
-const socketEvents = require("./socketEvents");
+const socketEvents = require("./server/socketEvents");
 var path = require("path");
 var app = express();
 var server = http.createServer(app);
 const io = require('socket.io')(server);
 const dotenv = require('dotenv');
-dotenv.config({path: __dirname + "/dev.env"});
+dotenv.config();
 
 server.listen(process.env.PORT);
  
