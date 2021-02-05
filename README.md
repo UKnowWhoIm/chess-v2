@@ -22,10 +22,12 @@ This is a browser based multiplayer chess engine written in Node.
 ### Basic Workflow
 
 - If the player creates a room, a new document is created in DB and a new room is allocated to the player. 
-- Joining or creating a room will lead to the getGameId event, which sends the gameId to the client.
-- After 2 players are in a room, the game automatically starts.
-- Each move made by the player is sent to the server using makeMove event. 
-- The board state is read from the db and the move is validated. The board is sent to the listening clients through updateBoard event.
+- Joining or creating a room will lead to the `getGameId` event, which sends the `gameId` to the client.
+- After 2 players are in a room, the game countdown starts by emitting the `startCountDown` event.
+- If a player quit during the countdown, an `endCountDownDisconnect` event is emitted and the countdown stops.
+- After the countdown ends, if the room still has 2 players, the game will begin by emitting `startGame` event.
+- Each move made by the player is sent to the server using `makeMove` event. 
+- The board state is read from the db and the move is validated. The board is sent to the listening clients through `updateBoard` event.
 - This goes on until the game is over through victory or draw.
 - After the game is over, the game's details are removed from DB.
 
