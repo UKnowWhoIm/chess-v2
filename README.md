@@ -3,15 +3,15 @@
 This is a browser based multiplayer chess engine written in Node.
 
 ## Table Of Contents
-- ### [How does it work](#how-does-it-work?)?
-    - #### [Basic Workflow](#basic-workflow)
-- ### [Chess Logic](#chess-logic)
-    - #### [Storing Board State](#storing-the-board-state)
-    - #### [The Piece Classes](#the-piece-classes)
-    - #### [The Board Class](#the-board-class)
-    - #### [Move Validation](#move-validation)
-    - #### [Pawn Promotion](#pawn-promotion)
-- ### [Socket Events](#socket-events)
+- [How does it work](#how-does-it-work?)?
+    - [Basic Workflow](#basic-workflow)
+- [Chess Logic](#chess-logic)
+    - [Storing Board State](#storing-the-board-state)
+    - [The Piece Classes](#the-piece-classes)
+    - [The Board Class](#the-board-class)
+    - [Move Validation](#move-validation)
+    - [Pawn Promotion](#pawn-promotion)
+- [Socket Events](#socket-events)
 
 ## How does it work?
 
