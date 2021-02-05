@@ -8,6 +8,8 @@
     <script src="/static/chessBrowserJS.js"></script>
     <script src="/static/chessClient.js"></script>
     <script src="/socket.io/socket.io.js"></script>
+    <script src="/static/snackBar.js"></script>
+    <link rel="stylesheet" href="/static/snackbar.css"/>
     <style>
         body{
             text-align: center;
@@ -68,6 +70,7 @@
         #waiting{
             color: white;
         }
+        
     </style>
     <title></title>
   </head>
@@ -93,6 +96,7 @@
         </p><br/>
         <button onclick="window.location.reload()">Leave Room</button>
     </div>
+    <div id="snackbar"></div>
     <script>
         let disableMoves = false;
 
@@ -199,20 +203,20 @@
         socket.on("boardUpdated", (fen) => {
             setBoardState(fen);
             if(board.player == getThisPlayer())
-                alert("Your Turn");
+                showSnackBar("Your Turn");
         });
 
         socket.on("playerColor", (player) => {
             sessionStorage.setItem("player", player);
             if(player == Players.white)
-                alert("You\'re playing as white");
+                showSnackBar("You\'re playing as white");
             else
-                alert("You\'re playing as black");
+                showSnackBar("You\'re playing as black");
         });
 
         socket.on("reJoinSuccess", () => {setBoardState(fen);prepForGame();});
 
-        socket.on("playerJoined", () => alert("A Player has joined"));
+        socket.on("playerJoined", () => showSnackBar("A Player has joined"));
 
         socket.on("invalidMove", () => alert("That move isn\'t allowed"));
 
@@ -246,7 +250,7 @@
         });
 
         socket.on("playerDisconnect", function(){
-            alert("A player has disconnected")
+            showSnackBar("A player has disconnected")
         });
 
         socket.on("endGameDisconnect", function(){
