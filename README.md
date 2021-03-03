@@ -2,6 +2,8 @@
 
 This is a browser based multiplayer chess engine written in Node.
 
+This project made into the top 5 projects in [TinkerHub HireHack](https://www.notion.so/Hirehack-Wiki-TinkerHub-0f66c68a6bd64f9ba8ea0a22e468d6a1).
+
 ## Table Of Contents
 - [How does it work](#how-does-it-work)?
     - [Basic Workflow](#basic-workflow)
