@@ -1,6 +1,6 @@
 {
     "node": true,
-    "esversion": 9,
+    "esversion": 10,
     "camelcase": true,    
     "indent": 4
 }

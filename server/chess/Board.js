@@ -191,7 +191,7 @@ class Board{
                 this, piece, {"checkForCheck": checkForCheck}
             )
         );
-        
+        // jshint ignore:start
         if(checkForCheck)
             for(piece in validMoves){
                 moves = validMoves[piece];
@@ -208,7 +208,7 @@ class Board{
             }
         else
             return validMoves;
-
+        // jshint ignore:end
         return legalMoves;
     }
 

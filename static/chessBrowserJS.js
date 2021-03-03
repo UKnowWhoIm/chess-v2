@@ -5,7 +5,7 @@ const Players = {
     "black": 1,
     "w": 0,
     "b": 1
-}
+};
 
 hasLowerCase = (str) => String(str).toUpperCase() != str;
 
@@ -87,7 +87,7 @@ class Piece{
                     continue;
                 if(this.multipleMoves){
                     for(var pos = positionCoord; !checkOutOfBounds(pos, move); pos = addCoordinates(move, pos)){
-                        if((board.array[getPosition(addCoordinates(move, pos))]?.player) != this.player)
+                        if(board.array[getPosition(addCoordinates(move, pos))]?.player != this.player) // jshint ignore:line
                             moves.push(getPosition(addCoordinates(move, pos)));
                         if(board.array[getPosition(addCoordinates(move, pos))] != null)
                             // Encountered a piece
@@ -95,7 +95,7 @@ class Piece{
                     }
                 }
                 else{
-                    if(board.array[getPosition(addCoordinates(move, positionCoord))]?.player != this.player){
+                    if(board.array[getPosition(addCoordinates(move, positionCoord))]?.player != this.player){ // jshint ignore:line
                         moves.push(getPosition(addCoordinates(move, positionCoord)));
                     }
                 }
@@ -104,7 +104,7 @@ class Piece{
         // Capture Moves(Pawn)
         if(this.nextCaptureMoves != null)
             for(move of this.nextCaptureMoves)
-                if(!checkOutOfBounds(positionCoord, move) && board.array[getPosition(addCoordinates(move, positionCoord))]?.player == changePlayer(this.player))
+                if(!checkOutOfBounds(positionCoord, move) && board.array[getPosition(addCoordinates(move, positionCoord))]?.player == changePlayer(this.player)) // jshint ignore:line
                     moves.push(getPosition(addCoordinates(move, positionCoord)));
 
         moves.push(...this.getSpecialMoves(board, position, splMoveArgs));
@@ -116,7 +116,7 @@ class Piece{
             return null;
         if(hasLowerCase(piece))
             return Players.black;
-        return Players.white
+        return Players.white;
     }
 
 }
@@ -191,12 +191,12 @@ class King extends Piece{
 
     getSpecialMoves(board, position, args){
         let moves = [];
-        if(board.castleData[this.player]['k'])
+        if(board.castleData[this.player].k)
             if(board.array[position + 1] == null && board.array[position + 2] == null)
                 if((args.checkForCheck && !board.isCheck(this.player)) || !args.checkForCheck)
                     moves.push(position + 2);
         
-        if(board.castleData[this.player]['q'])
+        if(board.castleData[this.player].q)
             if(board.array[position - 1] == null && board.array[position - 2] == null  && board.array[position - 3] == null)
                 if((args.checkForCheck && !board.isCheck(this.player)) || !args.checkForCheck)
                     moves.push(position - 2);
@@ -237,7 +237,7 @@ class Board{
         this._whitePieces = [];
         this.player = Players[raw[1]];
         this.castleData = this.getCastleData(raw[2]);
-        this.enPassantSquare = this.getEnPassantData(raw[3])
+        this.enPassantSquare = this.getEnPassantData(raw[3]);
         this.halfMoves = Number.parseInt(raw[4]);
         this.fullMoves = Number.parseInt(raw[5]);
     }
@@ -248,13 +248,13 @@ class Board{
         castleData[Players.black] = {};
         
         if(castleString.search("K") != -1)
-            castleData[Players.white]["k"] = true;
+            castleData[Players.white].k = true;
         if(castleString.search("Q") != -1)
-            castleData[Players.white]["q"] = true;
+            castleData[Players.white].q = true;
         if(castleString.search("k") != -1)
-            castleData[Players.black]["k"] = true;
+            castleData[Players.black].k = true;
         if(castleString.search("q") != -1)
-            castleData[Players.black]["q"] = true;
+            castleData[Players.black].q = true;
 
         return castleData;
     }
@@ -282,7 +282,7 @@ class Board{
         // outputs pos64
         let pieces = [];
         for(var i=0; i<64; i++) 
-            if(this.array[i]?.player == player)
+            if(this.array[i]?.player == player) // jshint ignore:line
                 pieces.push(i);
         return pieces;
     }
@@ -329,9 +329,9 @@ class Board{
         
         if(piece.type.toLowerCase() == "r")
             if(from % 8 == 0)
-                this.castleData[this.player]['q'] = false;
+                this.castleData[this.player].q = false;
             else if(from % 8 == 7)
-                this.castleData[this.player]['k'] = false;
+                this.castleData[this.player].k = false;
 
         // HalfMove Clock
         if(piece.type.toLowerCase() == "p" || this.array[to] != null)
@@ -345,9 +345,9 @@ class Board{
         
         // Player change
         if(this.pawnPromotion == null)
-            this.player = changePlayer(this.player)
+            this.player = changePlayer(this.player);
 
-        this.array[to] = this.array[from]
+        this.array[to] = this.array[from];
         this.array[from] = null;
         this.fen = this.boardToFEN();
     }
@@ -423,7 +423,7 @@ class Board{
         else
             target = "K";
         for(let i=0; i<64; i++)
-            if(this.array[i]?.type == target)
+            if(this.array[i]?.type == target) // jshint ignore:line
                 return i;
 
     }
@@ -436,7 +436,7 @@ class Board{
                 if(blankSpaces)
                     fen += String(blankSpaces);
                 blankSpaces = 0;
-                fen += "/"
+                fen += "/";
             }
             if(this.array[i]){
                 if(blankSpaces)
@@ -457,13 +457,13 @@ class Board{
         fen += " ";
 
         let castleString = "";
-        if(this.castleData[Players.white]['k'])
+        if(this.castleData[Players.white].k)
             castleString += "K";
-        if(this.castleData[Players.white]['q'])
+        if(this.castleData[Players.white].q)
             castleString += "Q";
-        if(this.castleData[Players.black]['k'])
+        if(this.castleData[Players.black].k)
             castleString += "k";
-        if(this.castleData[Players.black]['q'])
+        if(this.castleData[Players.black].q)
             castleString += "q";
        
         fen += castleString;
