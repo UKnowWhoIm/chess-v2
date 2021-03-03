@@ -20,7 +20,7 @@ class Board{
         this.array = this.getFENPieces(raw[0]);
         this.player = utils.Players[raw[1]];
         this.castleData = this.getCastleData(raw[2]);
-        this.enPassantSquare = this.getEnPassantData(raw[3])
+        this.enPassantSquare = this.getEnPassantData(raw[3]);
         this.halfMoves = Number.parseInt(raw[4]);
         this.fullMoves = Number.parseInt(raw[5]);
     }
@@ -31,13 +31,13 @@ class Board{
         castleData[utils.Players.black] = {};
         
         if(castleString.search("K") != -1)
-            castleData[utils.Players.white]["k"] = true;
+            castleData[utils.Players.white].k = true;
         if(castleString.search("Q") != -1)
-            castleData[utils.Players.white]["q"] = true;
+            castleData[utils.Players.white].q = true;
         if(castleString.search("k") != -1)
-            castleData[utils.Players.black]["k"] = true;
+            castleData[utils.Players.black].k = true;
         if(castleString.search("q") != -1)
-            castleData[utils.Players.black]["q"] = true;
+            castleData[utils.Players.black].q = true;
 
         return castleData;
     }
@@ -97,11 +97,14 @@ class Board{
         // En Passant & Pawn Promotion
         if(piece.type.toLowerCase() == "p"){
             if(Math.abs(from - to) == 16)
-                this.enPassantSquare = Number.parseInt(to) + utils.playerMultiplier(utils.changePlayer(this.player)) * 8;
+                this.enPassantSquare = Number.parseInt(to) + 
+                    utils.playerMultiplier(utils.changePlayer(this.player)) * 8;
             else
                 this.enPassantSquare = null;
-            if(this.player == utils.Players.white && Math.floor(to / 8)  == 0 || this.player == utils.Players.black && Math.floor(to / 8) == 7){
-                this.pawnPromotion = to;
+            if(this.player == utils.Players.white && Math.floor(to / 8)  == 0 || 
+                this.player == utils.Players.black && Math.floor(to / 8) == 7){
+
+                    this.pawnPromotion = to;
             }
         }
         else
@@ -113,9 +116,9 @@ class Board{
         
         if(piece.type.toLowerCase() == "r")
             if(from % 8 == 0)
-                this.castleData[this.player]['q'] = false;
+                this.castleData[this.player].q = false;
             else if(from % 8 == 7)
-                this.castleData[this.player]['k'] = false;
+                this.castleData[this.player].k = false;
 
         // HalfMove Clock
         if(piece.type.toLowerCase() == "p" || this.array[to] != null)
@@ -131,7 +134,7 @@ class Board{
         if(this.pawnPromotion == null)
             this.player = utils.changePlayer(this.player);
 
-        this.array[to] = this.array[from]
+        this.array[to] = this.array[from];
         this.array[from] = null;
         this.fen = this.boardToFEN();
     }
@@ -158,7 +161,10 @@ class Board{
     }
 
     checkVictory(player=this.player){
-        return this.isCheck(utils.changePlayer(player)) && Object.keys(this.getNextMoves(true, utils.changePlayer(player))).length === 0;
+        return this.isCheck(
+            utils.changePlayer(player)) && 
+                Object.keys(this.getNextMoves(true, utils.changePlayer(player)))
+                .length === 0;
     }
 
     checkStaleMate(currentPlayer){
@@ -179,7 +185,13 @@ class Board{
         let piece, moves, board;
         let validMoves = {};
         let legalMoves = {};
-        pieces.forEach(piece => validMoves[piece] = this.array[piece].getAllMoves(this, piece, {"checkForCheck": checkForCheck}));
+        
+        pieces.forEach(
+            piece => validMoves[piece] = this.array[piece].getAllMoves(
+                this, piece, {"checkForCheck": checkForCheck}
+            )
+        );
+        
         if(checkForCheck)
             for(piece in validMoves){
                 moves = validMoves[piece];
@@ -220,7 +232,7 @@ class Board{
                 if(blankSpaces)
                     fen += String(blankSpaces);
                 blankSpaces = 0;
-                fen += "/"
+                fen += "/";
             }
             if(this.array[i]){
                 if(blankSpaces)
@@ -241,13 +253,13 @@ class Board{
         fen += " ";
 
         let castleString = "";
-        if(this.castleData[utils.Players.white]['k'])
+        if(this.castleData[utils.Players.white].k)
             castleString += "K";
-        if(this.castleData[utils.Players.white]['q'])
+        if(this.castleData[utils.Players.white].q)
             castleString += "Q";
-        if(this.castleData[utils.Players.black]['k'])
+        if(this.castleData[utils.Players.black].k)
             castleString += "k";
-        if(this.castleData[utils.Players.black]['q'])
+        if(this.castleData[utils.Players.black].q)
             castleString += "q";
        
         fen += castleString;

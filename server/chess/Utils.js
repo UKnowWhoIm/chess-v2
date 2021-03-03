@@ -3,7 +3,7 @@ const Players = {
     "black": 1,
     "w": 0,
     "b": 1
-}
+};
 
 let hasLowerCase = (str) => String(str).toUpperCase() != str;
 
@@ -60,7 +60,6 @@ module.exports = {
     getNotationFromPosition: getNotationFromPosition,
     getLocationFromNotation: getLocationFromNotation,
     changePlayer: changePlayer,
-    playerMultiplier: playerMultiplier,
     isLeftEdge: isLeftEdge,
     isRightEdge: isRightEdge,
     addCoordinates: addCoordinates,

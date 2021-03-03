@@ -60,7 +60,7 @@ class Piece{
             return null;
         if(utils.hasLowerCase(piece))
             return utils.Players.black;
-        return utils.Players.white
+        return utils.Players.white;
     }
 
 }
@@ -135,12 +135,12 @@ class King extends Piece{
 
     getSpecialMoves(board, position, args){
         let moves = [];
-        if(board.castleData[this.player]['k'])
+        if(board.castleData[this.player].k)
             if(board.array[position + 1] == null && board.array[position + 2] == null)
                 if((args.checkForCheck && !board.isCheck(this.player)) || !args.checkForCheck)
                     moves.push(position + 2);
         
-        if(board.castleData[this.player]['q'])
+        if(board.castleData[this.player].q)
             if(board.array[position - 1] == null && board.array[position - 2] == null  && board.array[position - 3] == null)
                 if((args.checkForCheck && !board.isCheck(this.player)) || !args.checkForCheck)
                     moves.push(position - 2);

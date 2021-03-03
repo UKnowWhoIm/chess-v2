@@ -32,22 +32,22 @@ async function updateGameRoom(id, board, white, black, started, promotionData){
     let dbObj = await getDBObject();
     let updateData = {};
     if(board !== undefined)
-        updateData["board"] = board;
+        updateData.board = board;
     if(white !== undefined)
-        updateData["white"] = white;
+        updateData.white = white;
     if(black !== undefined)
-        updateData["black"] = black;
+        updateData.black = black;
     if(started !== undefined)
-        updateData["started"] = started;
+        updateData.started = started;
     if(promotionData !== undefined)
-        updateData["pawnPromotionData"] = promotionData;
+        updateData.pawnPromotionData = promotionData;
     await dbObj.db.collection(clGameRooms).updateOne({"_id": ObjectID(id)}, {$set: updateData}, { "upsert": true });
     dbObj.conn.close();
 }
 
 async function deleteGameRoom(id){
     let dbObj = await getDBObject();
-    await dbObj.db.collection(clGameRooms).deleteOne({"_id": ObjectID(id)})
+    await dbObj.db.collection(clGameRooms).deleteOne({"_id": ObjectID(id)});
     dbObj.conn.close();
 }
 

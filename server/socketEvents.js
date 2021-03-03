@@ -5,7 +5,7 @@ const chessBoard = require("./chess/Board").Board;
 
 async function assignRoom(roomId, clients){
     // Assign clients colors randomly and start game
-    let rand = Math.floor(Math.random() * 100)
+    let rand = Math.floor(Math.random() * 100);
     clients = Array.from(clients);
     
     let white, black;
@@ -40,7 +40,7 @@ function eventHandler(io, socket){
                 socket.emit("getGameId", val);
                 socket.join(String(val));
             }
-        )
+        );
     });
     
     socket.on("roomJoin", function(roomId){
@@ -87,7 +87,17 @@ function eventHandler(io, socket){
             if(nexMoves.hasOwnProperty(from) && nexMoves[from].includes(to)){
                 boardObj.makeMove(from, to);
                 if(boardObj.pawnPromotion != null)
-                    db.updateGameRoom(gameId, boardObj.fen, undefined, undefined, undefined, {"player": boardObj.player, "cell": boardObj.pawnPromotion});
+                    db.updateGameRoom(
+                        gameId, 
+                        boardObj.fen, 
+                        undefined, 
+                        undefined, 
+                        undefined, 
+                        {
+                            "player": boardObj.player, 
+                            "cell": boardObj.pawnPromotion
+                        }
+                    );
                 else
                     db.updateGameRoom(gameId, boardObj.fen);
                 
@@ -124,15 +134,19 @@ function eventHandler(io, socket){
         let room = await db.readGameRoom(gameId);
         let boardObj = new chessBoard(room.board);
         if(Object.keys(room.pawnPromotionData).length !== 0){
-            if(room.white == socket.id && room.pawnPromotionData.player == Players.white || room.black == socket.id && room.pawnPromotionData.player == Players.black)
-                if(room.pawnPromotionData.player == chessPiece.getPlayer(piece)){
-                    boardObj.pawnPromotion = room.pawnPromotionData.cell;
-                    boardObj.promotePawn(piece);
-                    db.updateGameRoom(gameId, boardObj.fen, undefined, undefined, undefined, null);
-                    io.to(gameId).emit("boardUpdated", boardObj.fen);
-                    socket.emit("successPawnPromotion");
-                    return;
-                }
+            if(room.white == socket.id && 
+                room.pawnPromotionData.player == Players.white ||
+                    room.black == socket.id && 
+                        room.pawnPromotionData.player == Players.black)
+
+                            if(room.pawnPromotionData.player == chessPiece.getPlayer(piece)){
+                                boardObj.pawnPromotion = room.pawnPromotionData.cell;
+                                boardObj.promotePawn(piece);
+                                db.updateGameRoom(gameId, boardObj.fen, undefined, undefined, undefined, null);
+                                io.to(gameId).emit("boardUpdated", boardObj.fen);
+                                socket.emit("successPawnPromotion");
+                                return;
+                            }
         }
         socket.emit("errorPawnPromotion");
     });

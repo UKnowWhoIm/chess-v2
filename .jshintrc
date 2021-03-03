@@ -2,7 +2,5 @@
     "node": true,
     "esversion": 9,
     "camelcase": true,    
-    "indent": 4,
-    "maxlen": 120,
-    "globals": {}
+    "indent": 4
 }
