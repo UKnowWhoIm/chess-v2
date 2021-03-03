@@ -8,6 +8,10 @@
     "lint": "jshint --exclude='node_modules/' *.js",
     "test": "npm run lint"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UKnowWhoIm/chess-v2.git"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {

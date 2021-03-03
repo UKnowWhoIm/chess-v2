@@ -1,14 +1,15 @@
 
-name: Build and test
+name: ESLint
 on: [push, pull_request]
 jobs:
   test:
     if: "! contains(toJSON(github.event.commits.*.message), '[skip-ci]')"
-    name: Generate build and test
+    name: ESLinter
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
-          node-version: "12"
-      - run: npm ci
+          node-version: "14"
+      - run: npm install
       - run: npm test
